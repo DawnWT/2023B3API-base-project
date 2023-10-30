@@ -89,6 +89,14 @@ export class UsersController {
     return res.status(HttpStatus.OK).json(user.content);
   }
 
+  @UseGuards(UsersGuard)
+  @Get()
+  async getUsers(@Res() res: Response) {
+    const users = await this.usersService.findAll();
+
+    return res.status(HttpStatus.OK).json(users);
+  }
+
   @Get(':id')
   async getUser(@Param('id') id: string, @Res() res: Response) {
     const userOption = await this.usersService.findOne(id);
