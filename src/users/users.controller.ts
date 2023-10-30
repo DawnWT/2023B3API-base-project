@@ -5,12 +5,15 @@ import {
   HttpStatus,
   Param,
   Post,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUser } from './interfaces/create-user';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { LoginParams } from './interfaces/auth';
+import { UsersGuard } from './users.guard';
 
 @Controller('users')
 export class UsersController {
@@ -70,6 +73,20 @@ export class UsersController {
     } else {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
     }
+  }
+
+  @UseGuards(UsersGuard)
+  @Get('me')
+  async getSelf(@Req() req: Request, @Res() res: Response) {
+    const { sub } = req['user'] as { sub: string; username: string };
+
+    const user = await this.usersService.findOne(sub);
+
+    if ('error' in user) {
+      return res.status(HttpStatus.NOT_FOUND).send(user.error);
+    }
+
+    return res.status(HttpStatus.OK).json(user.content);
   }
 
   @Get(':id')
