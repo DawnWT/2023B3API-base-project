@@ -1,4 +1,12 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUser } from './interfaces/create-user';
 import { Response } from 'express';
@@ -62,5 +70,16 @@ export class UsersController {
     } else {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
     }
+  }
+
+  @Get(':id')
+  async getUser(@Param('id') id: string, @Res() res: Response) {
+    const userOption = await this.usersService.findOne(id);
+
+    if ('content' in userOption) {
+      return res.status(HttpStatus.OK).json(userOption.content);
+    }
+
+    return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
   }
 }
