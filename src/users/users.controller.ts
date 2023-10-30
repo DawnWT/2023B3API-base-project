@@ -23,7 +23,7 @@ export class UsersController {
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const user = await this.usersService.create(createUserDto);
 
-    if ('error' in user) {
+    if (user.isErr()) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
     }
 
@@ -34,13 +34,13 @@ export class UsersController {
   async login(@Body() loginParams: LoginParams, @Res() res: Response) {
     const accessToken = await this.usersService.login(loginParams);
 
-    if ('content' in accessToken) {
-      return res
-        .status(HttpStatus.CREATED)
-        .json({ access_token: accessToken.content.access_token });
-    } else {
+    if (accessToken.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
     }
+
+    return res
+      .status(HttpStatus.CREATED)
+      .json({ access_token: accessToken.content.access_token });
   }
 
   @UseGuards(UsersGuard)
@@ -50,7 +50,7 @@ export class UsersController {
 
     const user = await this.usersService.findOne(sub);
 
-    if ('error' in user) {
+    if (user.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send(user.error);
     }
 
@@ -70,10 +70,10 @@ export class UsersController {
   async getUser(@Param('id') id: string, @Res() res: Response) {
     const userOption = await this.usersService.findOne(id);
 
-    if ('content' in userOption) {
-      return res.status(HttpStatus.OK).json(userOption.content);
+    if (userOption.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
     }
 
-    return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
+    return res.status(HttpStatus.OK).json(userOption.content);
   }
 }

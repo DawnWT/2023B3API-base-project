@@ -6,7 +6,7 @@ import { CreateUserDto } from './dto/signup.dto';
 import { genSalt, hash, compare } from 'bcrypt';
 import { LoginParams } from './interfaces/auth';
 import { JwtService } from '@nestjs/jwt';
-import { Option } from '../types/option';
+import { Err, Ok, Option } from '../types/option';
 
 @Injectable()
 export class UsersService {
@@ -24,9 +24,7 @@ export class UsersService {
     });
 
     if (userExist) {
-      return {
-        error: 'User already exists',
-      };
+      return Err('User already exist');
     }
 
     const user = new User(userDatas);
@@ -35,14 +33,7 @@ export class UsersService {
     user.password = await hash(user.password, salt);
 
     const { email, id, username, role } = await this.entityManager.save(user);
-    return {
-      content: {
-        email,
-        id,
-        username,
-        role,
-      },
-    };
+    return Ok({ email, id, username, role });
   }
 
   async findAll(): Promise<Array<Omit<User, 'password'>>> {
@@ -64,16 +55,14 @@ export class UsersService {
     });
 
     if (!user) {
-      return { error: 'User not found' };
+      return Err('User not found');
     } else {
-      return {
-        content: {
-          email: user.email,
-          id: user.id,
-          username: user.username,
-          role: user.role,
-        },
-      };
+      return Ok({
+        email: user.email,
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      });
     }
   }
 
@@ -92,22 +81,20 @@ export class UsersService {
     const user = await this.entityManager.findOne(User, { where: { email } });
 
     if (!user) {
-      return { error: 'User not found' };
+      return Err('User not found');
     }
 
     const isMatch = await compare(password, user.password);
 
     if (isMatch) {
       const payload = { username: user.username, sub: user.id };
-      return {
-        content: {
-          access_token: this.jwtService.sign(payload, {
-            secret: process.env.JWT_SECRET,
-          }),
-        },
-      };
+      return Ok({
+        access_token: this.jwtService.sign(payload, {
+          secret: process.env.JWT_SECRET,
+        }),
+      });
     } else {
-      return { error: 'Wrong password' };
+      return Err('Wrong password');
     }
   }
 }
