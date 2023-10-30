@@ -10,10 +10,10 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   public id!: string; // au format uuidv4
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'text' })
   public username!: string; // cette propriété doit porter une contrainte d'unicité
 
-  @Column({ unique: true })
+  @Column({ unique: true, type: 'text' })
   public email!: string; // cette propriété doit porter une contrainte d'unicité
 
   @Column({ type: 'text' })
