@@ -2,6 +2,7 @@ import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUser } from './interfaces/create-user';
 import { Response } from 'express';
+import { LoginParams } from './interfaces/auth';
 
 @Controller('users')
 export class UsersController {
@@ -48,5 +49,18 @@ export class UsersController {
     const user = await this.usersService.create(signupParams);
 
     return res.status(HttpStatus.CREATED).json(user);
+  }
+
+  @Post('auth/login')
+  async login(@Body() loginParams: LoginParams, @Res() res: Response) {
+    const accessToken = await this.usersService.login(loginParams);
+
+    if ('content' in accessToken) {
+      return res
+        .status(HttpStatus.CREATED)
+        .json({ access_token: accessToken.content.access_token });
+    } else {
+      return res.status(HttpStatus.UNAUTHORIZED).send('password');
+    }
   }
 }
