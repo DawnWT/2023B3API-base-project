@@ -17,11 +17,11 @@ import { LoginDto } from './dto/login.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly userService: UsersService) {}
 
   @Post('auth/sign-up')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    const user = await this.usersService.create(createUserDto);
+    const user = await this.userService.create(createUserDto);
 
     if (user.isErr()) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
@@ -32,7 +32,7 @@ export class UsersController {
 
   @Post('auth/login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const accessToken = await this.usersService.login(loginDto);
+    const accessToken = await this.userService.login(loginDto);
 
     if (accessToken.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
@@ -48,7 +48,7 @@ export class UsersController {
   async getSelf(@Req() req: Request, @Res() res: Response) {
     const { sub } = req['user'] as { sub: string; username: string };
 
-    const user = await this.usersService.findOne(sub);
+    const user = await this.userService.findOne(sub);
 
     if (user.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send(user.error);
@@ -60,7 +60,7 @@ export class UsersController {
   @UseGuards(UsersGuard)
   @Get()
   async getUsers(@Res() res: Response) {
-    const users = await this.usersService.findAll();
+    const users = await this.userService.findAll();
 
     return res.status(HttpStatus.OK).json(users);
   }
@@ -68,7 +68,7 @@ export class UsersController {
   @UseGuards(UsersGuard)
   @Get(':id')
   async getUser(@Param('id') id: string, @Res() res: Response) {
-    const userOption = await this.usersService.findOne(id);
+    const userOption = await this.userService.findOne(id);
 
     if (userOption.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send(userOption.error);

@@ -11,14 +11,14 @@ import { Err, Ok, Option } from '../types/option';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly usersRepository: Repository<User>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
 
   async create(
     userDatas: CreateUserDto,
   ): Promise<Option<Omit<User, 'password'>>> {
-    const userExist = await this.usersRepository.exist({
+    const userExist = await this.userRepository.exist({
       where: [{ email: userDatas.email }, { username: userDatas.username }],
     });
 
@@ -31,12 +31,12 @@ export class UsersService {
     const salt = await genSalt();
     user.password = await hash(user.password, salt);
 
-    const { email, id, username, role } = await this.usersRepository.save(user);
+    const { email, id, username, role } = await this.userRepository.save(user);
     return Ok({ email, id, username, role });
   }
 
   async findAll(): Promise<Array<Omit<User, 'password'>>> {
-    const users = await this.usersRepository.find();
+    const users = await this.userRepository.find();
 
     const usersWithoutPassword = users.map((user) => ({
       username: user.username,
@@ -49,7 +49,7 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<Option<Omit<User, 'password'>>> {
-    const user = await this.usersRepository.findOne({
+    const user = await this.userRepository.findOne({
       where: { id },
     });
 
@@ -77,7 +77,7 @@ export class UsersService {
     email,
     password,
   }: LoginDto): Promise<Option<{ access_token: string }>> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
       return Err('User not found');
