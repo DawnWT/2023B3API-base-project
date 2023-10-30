@@ -68,7 +68,7 @@ export class UsersController {
 
   @UseGuards(UsersGuard)
   @Get(':id')
-  async getUser(@Param('id') { id }: GetUserDto, @Res() res: Response) {
+  async getUser(@Param() { id }: GetUserDto, @Res() res: Response) {
     const userOption = await this.userService.findOne(id);
 
     if (userOption.isErr()) {
