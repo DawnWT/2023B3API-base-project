@@ -31,8 +31,17 @@ export class UsersService {
     };
   }
 
-  findAll() {
-    return this.usersRepository.find();
+  async findAll(): Promise<Array<Omit<User, 'password'>>> {
+    const users = await this.usersRepository.find();
+
+    const usersWithoutPassword = users.map((user) => ({
+      username: user.username,
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    }));
+
+    return usersWithoutPassword;
   }
 
   async findOne(id: string): Promise<Option<Omit<User, 'password'>>> {
