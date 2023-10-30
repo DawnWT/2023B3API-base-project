@@ -11,9 +11,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { Request, Response } from 'express';
-import { LoginParams } from './interfaces/auth';
 import { UsersGuard } from './users.guard';
 import { CreateUserDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('users')
 export class UsersController {
@@ -31,8 +31,8 @@ export class UsersController {
   }
 
   @Post('auth/login')
-  async login(@Body() loginParams: LoginParams, @Res() res: Response) {
-    const accessToken = await this.usersService.login(loginParams);
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    const accessToken = await this.usersService.login(loginDto);
 
     if (accessToken.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');

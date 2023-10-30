@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/signup.dto';
 import { genSalt, hash, compare } from 'bcrypt';
-import { LoginParams } from './interfaces/auth';
+import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { Err, Ok, Option } from '../types/option';
 
@@ -12,14 +12,13 @@ import { Err, Ok, Option } from '../types/option';
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    private readonly entityManager: EntityManager,
     private readonly jwtService: JwtService,
   ) {}
 
   async create(
     userDatas: CreateUserDto,
   ): Promise<Option<Omit<User, 'password'>>> {
-    const userExist = await this.entityManager.exists(User, {
+    const userExist = await this.usersRepository.exist({
       where: [{ email: userDatas.email }, { username: userDatas.username }],
     });
 
@@ -32,7 +31,7 @@ export class UsersService {
     const salt = await genSalt();
     user.password = await hash(user.password, salt);
 
-    const { email, id, username, role } = await this.entityManager.save(user);
+    const { email, id, username, role } = await this.usersRepository.save(user);
     return Ok({ email, id, username, role });
   }
 
@@ -77,8 +76,8 @@ export class UsersService {
   async login({
     email,
     password,
-  }: LoginParams): Promise<Option<{ access_token: string }>> {
-    const user = await this.entityManager.findOne(User, { where: { email } });
+  }: LoginDto): Promise<Option<{ access_token: string }>> {
+    const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) {
       return Err('User not found');
