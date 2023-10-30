@@ -14,6 +14,7 @@ import { Request, Response } from 'express';
 import { UsersGuard } from './users.guard';
 import { CreateUserDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
+import { GetUserDto } from './dto/getUser.dto';
 
 @Controller('users')
 export class UsersController {
@@ -67,7 +68,7 @@ export class UsersController {
 
   @UseGuards(UsersGuard)
   @Get(':id')
-  async getUser(@Param('id') id: string, @Res() res: Response) {
+  async getUser(@Param('id') { id }: GetUserDto, @Res() res: Response) {
     const userOption = await this.userService.findOne(id);
 
     if (userOption.isErr()) {
