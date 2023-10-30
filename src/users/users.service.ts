@@ -16,7 +16,19 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(userDatas: CreateUserDto): Promise<Omit<User, 'password'>> {
+  async create(
+    userDatas: CreateUserDto,
+  ): Promise<Option<Omit<User, 'password'>>> {
+    const userExist = await this.entityManager.exists(User, {
+      where: [{ email: userDatas.email }, { username: userDatas.username }],
+    });
+
+    if (userExist) {
+      return {
+        error: 'User already exists',
+      };
+    }
+
     const user = new User(userDatas);
 
     const salt = await genSalt();
@@ -24,10 +36,12 @@ export class UsersService {
 
     const { email, id, username, role } = await this.entityManager.save(user);
     return {
-      email,
-      id,
-      username,
-      role,
+      content: {
+        email,
+        id,
+        username,
+        role,
+      },
     };
   }
 

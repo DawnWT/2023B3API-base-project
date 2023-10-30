@@ -23,7 +23,11 @@ export class UsersController {
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
     const user = await this.usersService.create(createUserDto);
 
-    return res.status(HttpStatus.CREATED).json(user);
+    if ('error' in user) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
+    }
+
+    return res.status(HttpStatus.CREATED).json(user.content);
   }
 
   @Post('auth/login')
