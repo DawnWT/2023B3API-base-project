@@ -35,13 +35,22 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async findOne(id: string): Promise<Option<User>> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<Option<Omit<User, 'password'>>> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+    });
 
     if (!user) {
       return { error: 'User not found' };
     } else {
-      return { content: user };
+      return {
+        content: {
+          email: user.email,
+          id: user.id,
+          username: user.username,
+          role: user.role,
+        },
+      };
     }
   }
 
