@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateUser } from '../interfaces/create-user';
+import { CreateUserDto } from '../dto/signup.dto';
 
 @Entity()
 export class User {
-  constructor(datas: CreateUser) {
+  constructor(datas: CreateUserDto) {
     Object.assign(this, datas);
   }
 

@@ -10,54 +10,18 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUser } from './interfaces/create-user';
 import { Request, Response } from 'express';
 import { LoginParams } from './interfaces/auth';
 import { UsersGuard } from './users.guard';
+import { CreateUserDto } from './dto/signup.dto';
 
 @Controller('users')
 export class UsersController {
-  private emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
-
   constructor(private readonly usersService: UsersService) {}
 
   @Post('auth/sign-up')
-  async signup(@Body() signupParams: CreateUser, @Res() res: Response) {
-    if (!signupParams.username) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('username should not be empty');
-    }
-
-    if (!signupParams.email) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('email should not be empty');
-    }
-
-    if (!signupParams.password) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('password should not be empty');
-    }
-
-    if (signupParams.username.length < 3) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('username should be at least 3 character long');
-    }
-
-    if (signupParams.password.length < 8) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('password should be at least 8 character long');
-    }
-
-    if (!this.emailRegex.test(signupParams.email)) {
-      return res.status(HttpStatus.BAD_REQUEST).send('email must be an email');
-    }
-
-    const user = await this.usersService.create(signupParams);
+  async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
+    const user = await this.usersService.create(createUserDto);
 
     return res.status(HttpStatus.CREATED).json(user);
   }
@@ -97,6 +61,7 @@ export class UsersController {
     return res.status(HttpStatus.OK).json(users);
   }
 
+  @UseGuards(UsersGuard)
   @Get(':id')
   async getUser(@Param('id') id: string, @Res() res: Response) {
     const userOption = await this.usersService.findOne(id);

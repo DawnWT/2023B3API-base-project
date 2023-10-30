@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { CreateUser } from './interfaces/create-user';
+import { CreateUserDto } from './dto/signup.dto';
 import { genSalt, hash, compare } from 'bcrypt';
 import { LoginParams } from './interfaces/auth';
 import { JwtService } from '@nestjs/jwt';
@@ -16,7 +16,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(userDatas: CreateUser): Promise<Omit<User, 'password'>> {
+  async create(userDatas: CreateUserDto): Promise<Omit<User, 'password'>> {
     const user = new User(userDatas);
 
     const salt = await genSalt();
