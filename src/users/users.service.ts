@@ -17,7 +17,7 @@ export class UsersService {
 
   async create(
     userDatas: CreateUserDto,
-  ): Promise<Option<Omit<User, 'password'>>> {
+  ): Promise<Option<Omit<User, 'password' | 'ProjectUser'>>> {
     const userExist = await this.userRepository.exist({
       where: [{ email: userDatas.email }, { username: userDatas.username }],
     });
@@ -35,7 +35,7 @@ export class UsersService {
     return Ok({ email, id, username, role });
   }
 
-  async findAll(): Promise<Array<Omit<User, 'password'>>> {
+  async findAll(): Promise<Array<Omit<User, 'password' | 'ProjectUser'>>> {
     const users = await this.userRepository.find();
 
     const usersWithoutPassword = users.map((user) => ({
@@ -48,7 +48,9 @@ export class UsersService {
     return usersWithoutPassword;
   }
 
-  async findOne(id: string): Promise<Option<Omit<User, 'password'>>> {
+  async findOne(
+    id: string,
+  ): Promise<Option<Omit<User, 'password' | 'ProjectUser'>>> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
