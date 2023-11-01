@@ -12,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { UsersService } from '../users/services/users.service';
 import { Response } from 'express';
 import { IsAdmin } from '../users/guards/isAdmin.guard';
@@ -80,8 +79,8 @@ export class ProjectsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectsService.update(+id, updateProjectDto);
+  update(@Param('id') id: string) {
+    return this.projectsService.update(+id);
   }
 
   @Delete(':id')
