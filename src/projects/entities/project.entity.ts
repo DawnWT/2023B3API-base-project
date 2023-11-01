@@ -18,5 +18,5 @@ export class Project {
   public referringEmployeeId!: Array<string>; //au format uuidv4
 
   @OneToMany(() => ProjectUser, (projectUser) => projectUser.projectId)
-  public ProjectUser!: ProjectUser[];
+  public projectUser!: ProjectUser[];
 }
