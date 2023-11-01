@@ -26,26 +26,33 @@ export class UsersController {
 
   @Post('auth/sign-up')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    const user = await this.authService.signup(createUserDto);
+    const userOption = await this.authService.signup(createUserDto);
 
-    if (user.isErr()) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
+    if (userOption.isErr()) {
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(userOption.error);
     }
 
-    return res.status(HttpStatus.CREATED).json(user.content);
+    const cleanUser = this.userService.removeProps(
+      userOption.content,
+      'password',
+    );
+
+    return res.status(HttpStatus.CREATED).json(cleanUser);
   }
 
   @Post('auth/login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const accessToken = await this.authService.login(loginDto);
+    const accessTokenOption = await this.authService.login(loginDto);
 
-    if (accessToken.isErr()) {
+    if (accessTokenOption.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
     }
 
     return res
       .status(HttpStatus.CREATED)
-      .json({ access_token: accessToken.content.access_token });
+      .json({ access_token: accessTokenOption.content.access_token });
   }
 
   @UseGuards(UsersGuard)
@@ -53,13 +60,18 @@ export class UsersController {
   async getSelf(@Req() req: Request, @Res() res: Response) {
     const { sub } = req['user'] as { sub: string; username: string };
 
-    const user = await this.userService.findOne(sub);
+    const userOption = await this.userService.findOne(sub);
 
-    if (user.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(user.error);
+    if (userOption.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
     }
 
-    return res.status(HttpStatus.OK).json(user.content);
+    const cleanUser = this.userService.removeProps(
+      userOption.content,
+      'password',
+    );
+
+    return res.status(HttpStatus.OK).json(cleanUser);
   }
 
   @UseGuards(UsersGuard)
@@ -79,6 +91,11 @@ export class UsersController {
       return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
     }
 
-    return res.status(HttpStatus.OK).json(userOption.content);
+    const cleanUser = this.userService.removeProps(
+      userOption.content,
+      'password',
+    );
+
+    return res.status(HttpStatus.OK).json(cleanUser);
   }
 }
