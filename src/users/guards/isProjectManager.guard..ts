@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Payload } from '../../types/payload';
 
 @Injectable()
-export class IsAdmin extends IsAuth implements CanActivate {
+export class IsProjectManager extends IsAuth implements CanActivate {
   constructor(jwtService: JwtService) {
     super(jwtService);
   }
