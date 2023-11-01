@@ -15,9 +15,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(
-    userDatas: CreateUserDto,
-  ): Promise<Option<Omit<User, 'password'>>> {
+  async create(userDatas: CreateUserDto): Promise<Option<User>> {
     const userExist = await this.userRepository.exist({
       where: [{ email: userDatas.email }, { username: userDatas.username }],
     });
@@ -31,24 +29,17 @@ export class UsersService {
     const salt = await genSalt();
     user.password = await hash(user.password, salt);
 
-    const { email, id, username, role } = await this.userRepository.save(user);
-    return Ok({ email, id, username, role });
+    const savedUser = await this.userRepository.save(user);
+    return Ok(savedUser);
   }
 
-  async findAll(): Promise<Array<Omit<User, 'password'>>> {
+  async findAll(): Promise<Array<User>> {
     const users = await this.userRepository.find();
 
-    const usersWithoutPassword = users.map((user) => ({
-      username: user.username,
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    }));
-
-    return usersWithoutPassword;
+    return users;
   }
 
-  async findOne(id: string): Promise<Option<Omit<User, 'password'>>> {
+  async findOne(id: string): Promise<Option<User>> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -56,16 +47,11 @@ export class UsersService {
     if (!user) {
       return Err('User not found');
     } else {
-      return Ok({
-        email: user.email,
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      });
+      return Ok(user);
     }
   }
 
-  async finOneByEmail(email: string): Promise<Option<Omit<User, 'password'>>> {
+  async finOneByEmail(email: string): Promise<Option<User>> {
     const user = await this.userRepository.findOne({
       where: { email },
     });
@@ -73,12 +59,7 @@ export class UsersService {
     if (!user) {
       return Err('User not found');
     } else {
-      return Ok({
-        email: user.email,
-        id: user.id,
-        username: user.username,
-        role: user.role,
-      });
+      return Ok(user);
     }
   }
 
