@@ -1,4 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Project } from './project.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -20,8 +26,10 @@ export class ProjectUser {
   public userId!: string; //au format uuidv4
 
   @ManyToOne(() => Project, (project) => project.projectUser)
-  public project!: Project;
+  @JoinColumn({ name: 'projectId' })
+  public project?: Project;
 
   @ManyToOne(() => User, (user) => user.projectUser)
-  public user!: User;
+  @JoinColumn({ name: 'userId' })
+  public user?: User;
 }
