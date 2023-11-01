@@ -25,7 +25,7 @@ export class AuthService {
     password,
     username,
     role,
-  }: Omit<User, 'id'>): Promise<Option<User>> {
+  }: Omit<User, 'id' | 'projectUser'>): Promise<Option<User>> {
     const userExist = await this.userService.userExist({ username, email });
 
     if (userExist) {
