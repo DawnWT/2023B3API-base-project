@@ -16,6 +16,7 @@ import { CreateUserDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { GetUserDto } from './dto/getUser.dto';
 import { AuthService } from './services/auth.service';
+import { Payload } from '../types/payload';
 
 @Controller('users')
 export class UsersController {
@@ -58,9 +59,9 @@ export class UsersController {
   @UseGuards(UsersGuard)
   @Get('me')
   async getSelf(@Req() req: Request, @Res() res: Response) {
-    const { sub } = req['user'] as { sub: string; username: string };
+    const { id } = req['user'] as Payload;
 
-    const userOption = await this.userService.findOne(sub);
+    const userOption = await this.userService.findOne(id);
 
     if (userOption.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
