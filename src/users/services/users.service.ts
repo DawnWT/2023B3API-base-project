@@ -73,6 +73,20 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
+  async userExist({
+    username,
+    email,
+  }: {
+    username?: string;
+    email?: string;
+  }): Promise<boolean> {
+    const userExist = await this.userRepository.exist({
+      where: [{ username }, { email }],
+    });
+
+    return userExist;
+  }
+
   async login({
     email,
     password,
