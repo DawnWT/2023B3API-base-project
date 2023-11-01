@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './services/users.service';
 import { Request, Response } from 'express';
-import { UsersGuard } from './users.guard';
+import { IsAuth } from './guards/isAuth.guard';
 import { CreateUserDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { GetUserDto } from './dto/getUser.dto';
@@ -56,7 +56,7 @@ export class UsersController {
       .json({ access_token: accessTokenOption.content.access_token });
   }
 
-  @UseGuards(UsersGuard)
+  @UseGuards(IsAuth)
   @Get('me')
   async getSelf(@Req() req: Request, @Res() res: Response) {
     const { id } = req['user'] as Payload;
@@ -75,7 +75,7 @@ export class UsersController {
     return res.status(HttpStatus.OK).json(cleanUser);
   }
 
-  @UseGuards(UsersGuard)
+  @UseGuards(IsAuth)
   @Get()
   async getUsers(@Res() res: Response) {
     const users = await this.userService.findAll();
@@ -83,7 +83,7 @@ export class UsersController {
     return res.status(HttpStatus.OK).json(users);
   }
 
-  @UseGuards(UsersGuard)
+  @UseGuards(IsAuth)
   @Get(':id')
   async getUser(@Param() { id }: GetUserDto, @Res() res: Response) {
     const userOption = await this.userService.findOne(id);
