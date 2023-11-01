@@ -30,7 +30,7 @@ export class IsAuth implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
 
-      req['user'] = payload;
+      req['token'] = payload;
     } catch {
       throw new UnauthorizedException();
     }
