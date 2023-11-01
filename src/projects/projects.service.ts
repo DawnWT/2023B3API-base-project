@@ -1,20 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Err, Ok, Option } from '../types/option';
+import { UsersService } from '../users/services/users.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    private readonly userService: UsersService,
   ) {}
 
   async create(createProjectDto: CreateProjectDto): Promise<Option<Project>> {
-    const project = new Project(createProjectDto);
+    const referringEmployeeOption = await this.userService.findOne(
+      createProjectDto.referringEmployeeId,
+    );
+
+    if (referringEmployeeOption.isErr()) {
+      return Err(
+        'Could not create new Project\n' + referringEmployeeOption.error,
+      );
+    }
+
+    const project = new Project({
+      ...createProjectDto,
+      referringEmployee: referringEmployeeOption.content,
+    });
     let savedProject: Project;
 
     try {
@@ -34,7 +48,7 @@ export class ProjectsService {
     return `This action returns a #${id} project`;
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
+  update(id: number) {
     return `This action updates a #${id} project`;
   }
 
