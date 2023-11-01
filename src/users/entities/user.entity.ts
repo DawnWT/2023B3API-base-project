@@ -1,6 +1,5 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { CreateUserDto } from '../dto/signup.dto';
-import { ProjectUser } from '../../projects/entities/project-user.entity';
 
 @Entity()
 export class User {
@@ -26,7 +25,4 @@ export class User {
     default: 'Employee',
   })
   public role?: 'Employee' | 'Admin' | 'ProjectManager'; // valeur par defaut : 'Employee'
-
-  @OneToMany(() => ProjectUser, (projectUser) => projectUser.user)
-  public projectUser!: ProjectUser[];
 }
