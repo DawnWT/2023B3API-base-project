@@ -48,7 +48,7 @@ export class UsersController {
     const accessTokenOption = await this.authService.login(loginDto);
 
     if (accessTokenOption.isErr()) {
-      return res.status(HttpStatus.UNAUTHORIZED).send('password');
+      return res.status(HttpStatus.UNAUTHORIZED).send('Wrong credentials');
     }
 
     return res
