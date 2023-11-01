@@ -81,4 +81,17 @@ export class UsersService {
 
     return user;
   }
+
+  async getRole(id: string): Promise<Option<typeof User.prototype.role>> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      select: { role: true },
+    });
+
+    if (!user) {
+      return Err('User not found');
+    } else {
+      return Ok(user.role);
+    }
+  }
 }
