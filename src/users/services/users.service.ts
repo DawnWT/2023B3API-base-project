@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users/entities/user.entity';
+import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/signup.dto';
+import { CreateUserDto } from '../dto/signup.dto';
 import { genSalt, hash, compare } from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from '../dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { Err, Ok, Option } from '../types/option';
+import { Err, Ok, Option } from '../../types/option';
 
 @Injectable()
 export class UsersService {
