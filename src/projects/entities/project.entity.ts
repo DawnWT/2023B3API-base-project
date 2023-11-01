@@ -1,10 +1,15 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ProjectUser } from './project-user.entity';
-import { CreateProjectDto } from '../dto/create-project.dto';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Project {
-  constructor(datas: CreateProjectDto) {
+  constructor(datas: Omit<Project, 'id'>) {
     Object.assign(this, datas);
   }
 
@@ -15,8 +20,9 @@ export class Project {
   public name!: string;
 
   @Column({ type: 'uuid' })
-  public referringEmployeeId!: Array<string>; //au format uuidv4
+  public referringEmployeeId!: string; //au format uuidv4
 
-  @OneToMany(() => ProjectUser, (projectUser) => projectUser.projectId)
-  public projectUser!: ProjectUser[];
+  @OneToOne(() => User)
+  @JoinColumn({ name: 'referringEmployeeId' })
+  public referringEmployee!: User;
 }
