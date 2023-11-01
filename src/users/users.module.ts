@@ -9,13 +9,9 @@ import { IsAuth } from './guards/isAuth.guard';
 import { IsAdmin } from './guards/isAdmin.guard';
 import { IsProjectManager } from './guards/isProjectManager.guard.';
 import { Project } from '../projects/entities/project.entity';
-import { ProjectUser } from '../projects/entities/project-user.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Project, ProjectUser]),
-    JwtModule.register({}),
-  ],
+  imports: [TypeOrmModule.forFeature([User, Project]), JwtModule.register({})],
   controllers: [UsersController],
   providers: [
     UsersService,
