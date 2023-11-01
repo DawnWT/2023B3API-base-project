@@ -56,7 +56,17 @@ export class ProjectsController {
         .send(projectOption.error);
     }
 
-    return res.status(HttpStatus.CREATED).json(projectOption.content);
+    const cleanReferringEmployee = this.userService.removeProps(
+      projectOption.content.referringEmployee,
+      'password',
+    );
+
+    const cleanProject = {
+      ...projectOption.content,
+      referringEmployee: cleanReferringEmployee,
+    };
+
+    return res.status(HttpStatus.CREATED).json(cleanProject);
   }
 
   @Get()
