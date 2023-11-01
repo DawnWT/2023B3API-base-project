@@ -25,6 +25,6 @@ import { IsProjectManager } from './guards/isProjectManager.guard.';
       }),
     },
   ],
-  exports: [IsAuth, IsAdmin, IsProjectManager],
+  exports: [IsAuth, IsAdmin, IsProjectManager, UsersService],
 })
 export class UsersModule {}
