@@ -25,7 +25,7 @@ export class AuthService {
     password,
     username,
     role,
-  }: User): Promise<Option<User>> {
+  }: Omit<User, 'id'>): Promise<Option<User>> {
     const userExist = await this.userService.userExist({ username, email });
 
     if (userExist) {
@@ -34,12 +34,12 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
 
-    const user = new User({
+    const user = {
       email,
       password: hashedPassword,
       username,
       role,
-    });
+    };
 
     const savedUser = await this.userService.create(user);
 
