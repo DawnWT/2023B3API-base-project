@@ -7,11 +7,15 @@ import {
   Param,
   Delete,
   UseGuards,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UsersService } from '../users/services/users.service';
+import { IsProjectManager } from '../users/guards/isProjectManager.guard.';
+import { Response } from 'express';
 
 @Controller('projects')
 export class ProjectsController {
@@ -20,9 +24,39 @@ export class ProjectsController {
     private readonly userService: UsersService,
   ) {}
 
+  @UseGuards(IsProjectManager)
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
-    return this.projectsService.create(createProjectDto);
+  async create(
+    @Body() { name, referringEmployeeId }: CreateProjectDto,
+    @Res() res: Response,
+  ) {
+    const referringEmployeeRoleOption =
+      await this.userService.getRole(referringEmployeeId);
+
+    if (referringEmployeeRoleOption.isErr()) {
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .send('Referring employee not found');
+    }
+
+    if (referringEmployeeRoleOption.content !== 'ProjectManager') {
+      return res
+        .status(HttpStatus.UNAUTHORIZED)
+        .send('Referring employee is not a project manager');
+    }
+
+    const projectOption = await this.projectsService.create({
+      name,
+      referringEmployeeId,
+    });
+
+    if (projectOption.isErr()) {
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(projectOption.error);
+    }
+
+    return res.status(HttpStatus.CREATED).json(projectOption.content);
   }
 
   @Get()
