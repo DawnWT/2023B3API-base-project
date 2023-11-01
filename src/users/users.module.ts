@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './services/auth.service';
+import { IsAuth } from './guards/isAuth.guard';
+import { IsAdmin } from './guards/isAdmin.guard';
+import { IsProjectManager } from './guards/isProjectManager.guard.';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User]), JwtModule.register({})],
@@ -12,6 +15,9 @@ import { AuthService } from './services/auth.service';
   providers: [
     UsersService,
     AuthService,
+    IsAuth,
+    IsAdmin,
+    IsProjectManager,
     {
       provide: 'APP_PIPE',
       useValue: new ValidationPipe({
@@ -19,5 +25,6 @@ import { AuthService } from './services/auth.service';
       }),
     },
   ],
+  exports: [IsAuth, IsAdmin, IsProjectManager],
 })
 export class UsersModule {}
