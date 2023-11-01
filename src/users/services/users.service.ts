@@ -103,28 +103,4 @@ export class UsersService {
 
     return userExist;
   }
-
-  async login({
-    email,
-    password,
-  }: LoginDto): Promise<Option<{ access_token: string }>> {
-    const user = await this.userRepository.findOne({ where: { email } });
-
-    if (!user) {
-      return Err('User not found');
-    }
-
-    const isMatch = await compare(password, user.password);
-
-    if (isMatch) {
-      const payload = { username: user.username, sub: user.id };
-      return Ok({
-        access_token: this.jwtService.sign(payload, {
-          secret: process.env.JWT_SECRET,
-        }),
-      });
-    } else {
-      return Err('Wrong password');
-    }
-  }
 }
