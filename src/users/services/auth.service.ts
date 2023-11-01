@@ -4,8 +4,9 @@ import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
-import { genSalt, hash } from 'bcrypt';
+import { compare, genSalt, hash } from 'bcrypt';
 import { Option, Err, Ok } from '../../types/option';
+import { Payload } from '../../types/payload';
 
 @Injectable()
 export class AuthService {
@@ -55,5 +56,32 @@ export class AuthService {
     }
 
     return Ok(savedUser.content);
+  }
+
+  async login({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }): Promise<Option<{ access_token: string }>> {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (!user) {
+      return Err('User not found');
+    }
+
+    const isMatch = await compare(password, user.password);
+
+    if (isMatch) {
+      const payload: Payload = { id: user.id, role: user.role };
+      return Ok({
+        access_token: this.jwtService.sign(payload, {
+          secret: process.env.JWT_SECRET,
+        }),
+      });
+    } else {
+      return Err('Wrong password');
+    }
   }
 }
