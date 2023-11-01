@@ -10,7 +10,9 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(userDatas: Omit<User, 'id'>): Promise<Option<User>> {
+  async create(
+    userDatas: Omit<User, 'id' | 'projectUser'>,
+  ): Promise<Option<User>> {
     const user = new User(userDatas);
     const savedUser = await this.userRepository.save(user);
 
