@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { compare, genSalt, hash } from 'bcrypt';
@@ -11,7 +9,6 @@ import { Payload } from '../../types/payload';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
@@ -65,16 +62,19 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<Option<{ access_token: string }>> {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const userOption = await this.userService.finOneByEmail(email);
 
-    if (!user) {
+    if (userOption.isErr()) {
       return Err('User not found');
     }
 
-    const isMatch = await compare(password, user.password);
+    const isMatch = await compare(password, userOption.content.password);
 
     if (isMatch) {
-      const payload: Payload = { id: user.id, role: user.role };
+      const payload: Payload = {
+        id: userOption.content.id,
+        role: userOption.content.role,
+      };
       return Ok({
         access_token: this.jwtService.sign(payload, {
           secret: process.env.JWT_SECRET,
