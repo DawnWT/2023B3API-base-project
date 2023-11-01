@@ -14,8 +14,8 @@ import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { UsersService } from '../users/services/users.service';
-import { IsProjectManager } from '../users/guards/isProjectManager.guard.';
 import { Response } from 'express';
+import { IsAdmin } from '../users/guards/isAdmin.guard';
 
 @Controller('projects')
 export class ProjectsController {
@@ -24,7 +24,7 @@ export class ProjectsController {
     private readonly userService: UsersService,
   ) {}
 
-  @UseGuards(IsProjectManager)
+  @UseGuards(IsAdmin)
   @Post()
   async create(
     @Body() { name, referringEmployeeId }: CreateProjectDto,
