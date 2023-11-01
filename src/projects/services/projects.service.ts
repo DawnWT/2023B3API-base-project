@@ -1,16 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { Project } from './entities/project.entity';
+import { CreateProjectDto } from '../dto/create-project.dto';
+import { Project } from '../entities/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Err, Ok, Option } from '../types/option';
-import { UsersService } from '../users/services/users.service';
+import { Err, Ok, Option } from '../../types/option';
+import { UsersService } from '../../users/services/users.service';
+import { ProjectUser } from '../entities/project-user.entity';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
+    @InjectRepository(ProjectUser)
+    private readonly projectUserRepository: Repository<ProjectUser>,
     private readonly userService: UsersService,
   ) {}
 
@@ -40,8 +43,33 @@ export class ProjectsService {
     return Ok(savedProject);
   }
 
-  findAll() {
-    return `This action returns all projects`;
+  async findAll(): Promise<Option<Array<Project>>> {
+    try {
+      const projects = await this.projectRepository.find({
+        relations: { referringEmployee: true },
+      });
+
+      return Ok(projects);
+    } catch (error) {
+      return Err('Could not find projects');
+    }
+  }
+
+  async findAllFor(id: string): Promise<Option<Array<Project>>> {
+    try {
+      const projectsUser = await this.projectUserRepository.find({
+        where: { userId: id },
+        relations: {
+          project: true,
+        },
+      });
+
+      const projects = projectsUser.map((projectUser) => projectUser.project);
+
+      return Ok(projects);
+    } catch (error) {
+      return Err('Could not find projects');
+    }
   }
 
   findOne(id: number) {
