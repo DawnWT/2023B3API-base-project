@@ -2,8 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dto/signup.dto';
-import { genSalt, hash } from 'bcrypt';
 import { Err, Ok, Option } from '../../types/option';
 
 @Injectable()
@@ -12,21 +10,10 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(userDatas: CreateUserDto): Promise<Option<User>> {
-    const userExist = await this.userRepository.exist({
-      where: [{ email: userDatas.email }, { username: userDatas.username }],
-    });
-
-    if (userExist) {
-      return Err('User already exist');
-    }
-
+  async create(userDatas: Omit<User, 'id'>): Promise<Option<User>> {
     const user = new User(userDatas);
-
-    const salt = await genSalt();
-    user.password = await hash(user.password, salt);
-
     const savedUser = await this.userRepository.save(user);
+
     return Ok(savedUser);
   }
 
