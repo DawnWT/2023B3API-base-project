@@ -11,8 +11,7 @@ import { Err, Ok, Option } from '../../types/option';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
+    @InjectRepository(User) private readonly userRepository: Repository<User>
   ) {}
 
   async create(userDatas: CreateUserDto): Promise<Option<User>> {
