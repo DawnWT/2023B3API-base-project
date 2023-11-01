@@ -3,15 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from '../dto/signup.dto';
-import { genSalt, hash, compare } from 'bcrypt';
-import { LoginDto } from '../dto/login.dto';
-import { JwtService } from '@nestjs/jwt';
+import { genSalt, hash } from 'bcrypt';
 import { Err, Ok, Option } from '../../types/option';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
   async create(userDatas: CreateUserDto): Promise<Option<User>> {
