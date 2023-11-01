@@ -84,4 +84,15 @@ export class UsersService {
 
     return userExist;
   }
+
+  removeProps<T extends keyof typeof User.prototype>(
+    user: User,
+    ...props: Array<T>
+  ): Omit<User, T> {
+    for (const prop of props) {
+      delete user[prop];
+    }
+
+    return user;
+  }
 }
