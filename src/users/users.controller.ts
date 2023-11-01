@@ -15,14 +15,18 @@ import { UsersGuard } from './users.guard';
 import { CreateUserDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { GetUserDto } from './dto/getUser.dto';
+import { AuthService } from './services/auth.service';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post('auth/sign-up')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    const user = await this.userService.create(createUserDto);
+    const user = await this.authService.signup(createUserDto);
 
     if (user.isErr()) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
@@ -33,7 +37,7 @@ export class UsersController {
 
   @Post('auth/login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const accessToken = await this.userService.login(loginDto);
+    const accessToken = await this.authService.login(loginDto);
 
     if (accessToken.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('password');
