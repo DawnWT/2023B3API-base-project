@@ -4,6 +4,7 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Err, Ok, Option } from '../types/option';
 
 @Injectable()
 export class ProjectsService {
@@ -12,8 +13,17 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
   ) {}
 
-  create(createProjectDto: CreateProjectDto) {
-    return 'This action adds a new project';
+  async create(createProjectDto: CreateProjectDto): Promise<Option<Project>> {
+    const project = new Project(createProjectDto);
+    let savedProject: Project;
+
+    try {
+      savedProject = await this.projectRepository.save(project);
+    } catch (error) {
+      return Err('Could not create project');
+    }
+
+    return Ok(savedProject);
   }
 
   findAll() {
