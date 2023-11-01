@@ -9,12 +9,15 @@ import {
   UseGuards,
   Res,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UsersService } from '../users/services/users.service';
-import { Response } from 'express';
-import { IsAdmin } from '../users/guards/isAdmin.guard';
+import { ProjectsService } from '../services/projects.service';
+import { CreateProjectDto } from '../dto/create-project.dto';
+import { UsersService } from '../../users/services/users.service';
+import { Request, Response } from 'express';
+import { IsAdmin } from '../../users/guards/isAdmin.guard';
+import { IsAuth } from '../../users/guards/isAuth.guard';
+import { Payload } from '../../types/payload';
 
 @Controller('projects')
 export class ProjectsController {
@@ -68,9 +71,26 @@ export class ProjectsController {
     return res.status(HttpStatus.CREATED).json(cleanProject);
   }
 
+  @UseGuards(IsAuth)
   @Get()
-  findAll() {
-    return this.projectsService.findAll();
+  async findAll(@Req() req: Request, @Res() res: Response) {
+    const { id, role } = req['token'] as Payload;
+
+    if (role === 'Employee') {
+      const projects = await this.projectsService.findAllFor(id);
+
+      return res.status(HttpStatus.OK).json(projects);
+    }
+
+    const projects = await this.projectsService.findAll();
+
+    if (projects.isErr()) {
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Une erreur est survenue');
+    }
+
+    return res.status(HttpStatus.OK).json(projects.content);
   }
 
   @Get(':id')
