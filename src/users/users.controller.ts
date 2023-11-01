@@ -80,7 +80,11 @@ export class UsersController {
   async getUsers(@Res() res: Response) {
     const users = await this.userService.findAll();
 
-    return res.status(HttpStatus.OK).json(users);
+    const cleanUsers = users.map((u) =>
+      this.userService.removeProps(u, 'password'),
+    );
+
+    return res.status(HttpStatus.OK).json(cleanUsers);
   }
 
   @UseGuards(IsAuth)
