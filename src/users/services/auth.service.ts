@@ -25,12 +25,7 @@ export class AuthService {
     password,
     username,
     role,
-  }: {
-    username: string;
-    email: string;
-    password: string;
-    role?: typeof User.prototype.role;
-  }): Promise<Option<User>> {
+  }: User): Promise<Option<User>> {
     const userExist = await this.userService.userExist({ username, email });
 
     if (userExist) {
