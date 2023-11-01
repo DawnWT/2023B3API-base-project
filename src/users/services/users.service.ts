@@ -65,6 +65,23 @@ export class UsersService {
     }
   }
 
+  async finOneByEmail(email: string): Promise<Option<Omit<User, 'password'>>> {
+    const user = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      return Err('User not found');
+    } else {
+      return Ok({
+        email: user.email,
+        id: user.id,
+        username: user.username,
+        role: user.role,
+      });
+    }
+  }
+
   update(id: number) {
     return `This action updates a #${id} user`;
   }
