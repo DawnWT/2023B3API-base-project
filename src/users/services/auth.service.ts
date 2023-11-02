@@ -5,6 +5,7 @@ import { UsersService } from './users.service';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Option, Err, Ok } from '../../types/option';
 import { Payload } from '../../types/payload';
+import { CleanUser } from '../types/utility';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     password,
     username,
     role,
-  }: Omit<User, 'id' | 'projectUser'>): Promise<Option<User>> {
+  }: Omit<User, 'id' | 'projectUser'>): Promise<Option<CleanUser>> {
     const userExist = await this.userService.userExist({ username, email });
 
     if (userExist) {
@@ -57,7 +58,7 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<Option<{ access_token: string }>> {
-    const userOption = await this.userService.finOneByEmail(email);
+    const userOption = await this.userService.finOneByEmail(email, true);
 
     if (userOption.isErr()) {
       return Err('User not found');

@@ -4,6 +4,7 @@ import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { Err, Ok, Option } from '../../types/option';
 import { CreateUserDto } from '../dto/signup.dto';
+import { CleanUser, UserRoles } from '../types/utility';
 
 @Injectable()
 export class UsersService {
@@ -22,17 +23,21 @@ export class UsersService {
     return user;
   }
 
-  async create(userDatas: CreateUserDto): Promise<Option<User>> {
+  async create(userDatas: CreateUserDto): Promise<Option<CleanUser>> {
     const user = new User(userDatas);
     const savedUser = await this.userRepository.save(user);
 
-    return Ok(savedUser);
+    const cleanUser = this.removeProps(savedUser, 'password');
+
+    return Ok(cleanUser);
   }
 
-  async findAll(): Promise<Array<User>> {
+  async findAll(): Promise<Array<CleanUser>> {
     const users = await this.userRepository.find();
 
-    return users;
+    const cleanUsers = users.map((user) => this.removeProps(user, 'password'));
+
+    return cleanUsers;
   }
 
   async findOne(id: string): Promise<Option<CleanUser>>;
@@ -110,7 +115,7 @@ export class UsersService {
     return userExist;
   }
 
-  async getRole(id: string): Promise<Option<typeof User.prototype.role>> {
+  async getRole(id: string): Promise<Option<UserRoles>> {
     const user = await this.userRepository.findOne({
       where: { id },
       select: { role: true },
