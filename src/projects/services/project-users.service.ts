@@ -81,4 +81,29 @@ export class ProjectUsersService {
       return Err('Could not find project-user');
     }
   }
+
+  async findAll(): Promise<Option<Array<ProjectUser>>> {
+    try {
+      const projectUsers = await this.projectUserRepository.find({
+        relations: { project: true },
+      });
+
+      return Ok(projectUsers);
+    } catch (error) {
+      return Err('Could not find project-users');
+    }
+  }
+
+  async findAllFor(userId: string): Promise<Option<Array<ProjectUser>>> {
+    try {
+      const projectUsers = await this.projectUserRepository.find({
+        where: { userId },
+        relations: { project: true },
+      });
+
+      return Ok(projectUsers);
+    } catch (error) {
+      return Err('Could not find project-users');
+    }
+  }
 }
