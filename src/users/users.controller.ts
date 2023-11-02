@@ -59,7 +59,7 @@ export class UsersController {
   @UseGuards(IsAuth)
   @Get('me')
   async getSelf(@Req() req: Request, @Res() res: Response) {
-    const { id } = req['user'] as Payload;
+    const { id } = req['token'] as Payload;
 
     const userOption = await this.userService.findOne(id);
 
