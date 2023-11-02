@@ -10,6 +10,10 @@ import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class ProjectUser {
+  constructor(partial: Partial<ProjectUser>) {
+    Object.assign(this, partial);
+  }
+
   @PrimaryGeneratedColumn('uuid')
   public id!: string; //au format uuidv4
 
