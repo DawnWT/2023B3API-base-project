@@ -2,8 +2,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
@@ -24,7 +24,7 @@ export class Project {
   @Column({ type: 'uuid' })
   public referringEmployeeId!: string; //au format uuidv4
 
-  @OneToOne(() => User)
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'referringEmployeeId' })
   public referringEmployee!: User;
 
