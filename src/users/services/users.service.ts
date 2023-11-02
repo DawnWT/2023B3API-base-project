@@ -96,4 +96,32 @@ export class UsersService {
       return Ok(user.role);
     }
   }
+
+  async userIsAvailable(
+    id: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: { projectUser: true },
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    const { projectUser } = user;
+
+    for (const pj of projectUser) {
+      if (
+        (startDate >= pj.startDate && startDate <= pj.endDate) ||
+        (endDate >= pj.startDate && endDate <= pj.endDate)
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
