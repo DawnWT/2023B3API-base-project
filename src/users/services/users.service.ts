@@ -35,7 +35,13 @@ export class UsersService {
     return users;
   }
 
-  async findOne(id: string): Promise<Option<User>> {
+  async findOne(id: string): Promise<Option<CleanUser>>;
+  async findOne(id: string, withPassword: false): Promise<Option<CleanUser>>;
+  async findOne(id: string, withPassword: true): Promise<Option<User>>;
+  async findOne(
+    id: string,
+    withPassword = false,
+  ): Promise<Option<CleanUser | User>> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -43,11 +49,26 @@ export class UsersService {
     if (!user) {
       return Err('User not found');
     } else {
+      if (!withPassword) {
+        const cleanUser = this.removeProps(user, 'password');
+
+        return Ok(cleanUser);
+      }
+
       return Ok(user);
     }
   }
 
-  async finOneByEmail(email: string): Promise<Option<User>> {
+  async finOneByEmail(email: string): Promise<Option<CleanUser>>;
+  async finOneByEmail(
+    email: string,
+    withPassword: false,
+  ): Promise<Option<CleanUser>>;
+  async finOneByEmail(email: string, withPassword: true): Promise<Option<User>>;
+  async finOneByEmail(
+    email: string,
+    withPassword = false,
+  ): Promise<Option<CleanUser | User>> {
     const user = await this.userRepository.findOne({
       where: { email },
     });
@@ -55,6 +76,12 @@ export class UsersService {
     if (!user) {
       return Err('User not found');
     } else {
+      if (!withPassword) {
+        const cleanUser = this.removeProps(user, 'password');
+
+        return Ok(cleanUser);
+      }
+
       return Ok(user);
     }
   }
