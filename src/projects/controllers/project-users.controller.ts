@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -15,6 +16,7 @@ import { CreateProjectUserDto } from '../dto/create-project-user.dto';
 import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
 import { ProjectUsersService } from '../services/project-users.service';
+import { GetProjectUserParamDto } from '../dto/get-project-user.dto';
 
 @Controller('project-users')
 export class ProjectUsersController {
@@ -110,5 +112,36 @@ export class ProjectUsersController {
     return res
       .status(HttpStatus.OK)
       .json(projectUser.content.map((pu) => pu.project));
+  }
+
+  @UseGuards(IsAuth)
+  @Get(':id')
+  async findOne(
+    @Param() { id: paramId }: GetProjectUserParamDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const { role, id: tokenId } = req['token'] as Payload;
+
+    if (role === 'Employee') {
+      const projectUser = await this.projectsUserService.findOneFor(
+        paramId,
+        tokenId,
+      );
+
+      if (projectUser.isErr()) {
+        return res.status(HttpStatus.NOT_FOUND).send(projectUser.error);
+      }
+
+      return res.status(HttpStatus.OK).json(projectUser.content);
+    }
+
+    const projectUser = await this.projectsUserService.findOne(paramId);
+
+    if (projectUser.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send(projectUser.error);
+    }
+
+    return res.status(HttpStatus.OK).json(projectUser.content);
   }
 }
