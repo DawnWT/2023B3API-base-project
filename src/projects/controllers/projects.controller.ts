@@ -18,6 +18,7 @@ import { Request, Response } from 'express';
 import { IsAdmin } from '../../users/guards/isAdmin.guard';
 import { IsAuth } from '../../users/guards/isAuth.guard';
 import { Payload } from '../../types/payload';
+import { GetProjectParamsDto } from '../dto/get-project.dto';
 
 @Controller('projects')
 export class ProjectsController {
@@ -115,9 +116,48 @@ export class ProjectsController {
     return res.status(HttpStatus.OK).json(cleanProjects);
   }
 
+  @UseGuards(IsAuth)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectsService.findOne(+id);
+  async findOne(
+    @Param() { id: paramId }: GetProjectParamsDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const { id: tokenId, role } = req['token'] as Payload;
+
+    if (role === 'Employee') {
+      const project = await this.projectsService.findOneFor(tokenId, paramId);
+
+      if (project.isErr()) {
+        return res.status(HttpStatus.FORBIDDEN).send('Forbidden');
+      }
+
+      const cleanProject = {
+        ...project.content,
+        referringEmployee: this.userService.removeProps(
+          project.content.referringEmployee,
+          'password',
+        ),
+      };
+      return res.status(HttpStatus.OK).json(cleanProject);
+    }
+
+    const project = await this.projectsService.findOne(paramId);
+
+    if (project.isErr()) {
+      return res
+        .status(HttpStatus.NOT_FOUND)
+        .send('This project does not exist');
+    }
+
+    const cleanProject = {
+      ...project.content,
+      referringEmployee: this.userService.removeProps(
+        project.content.referringEmployee,
+        'password',
+      ),
+    };
+    return res.status(HttpStatus.OK).json(cleanProject);
   }
 
   @Patch(':id')
