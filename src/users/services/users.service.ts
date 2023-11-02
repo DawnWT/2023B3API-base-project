@@ -58,14 +58,16 @@ export class UsersService {
   }
 
   async userExist({
+    id,
     username,
     email,
   }: {
+    id?: string;
     username?: string;
     email?: string;
   }): Promise<boolean> {
     const userExist = await this.userRepository.exist({
-      where: [{ username }, { email }],
+      where: [{ username }, { email }, { id }],
     });
 
     return userExist;
