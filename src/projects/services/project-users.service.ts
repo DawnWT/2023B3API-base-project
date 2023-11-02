@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Project } from '../entities/project.entity';
 import { ProjectUser } from '../entities/project-user.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from '../../users/services/users.service';
+import { CreateProjectUserDto } from '../dto/create-project-user.dto';
+import { Option, Err, Ok } from '../../types/option';
 import { ProjectsService } from './projects.service';
 
 @Injectable()
