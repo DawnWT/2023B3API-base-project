@@ -12,7 +12,7 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  private removeProps<T extends keyof typeof User.prototype>(
+  removeProps<T extends keyof typeof User.prototype>(
     user: User,
     ...props: Array<T>
   ): Omit<User, T> {
