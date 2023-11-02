@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Req,
@@ -81,5 +82,33 @@ export class ProjectUsersController {
     };
 
     return res.status(HttpStatus.CREATED).send(cleanProjectUser);
+  }
+
+  @UseGuards(IsAuth)
+  @Get()
+  async findAll(@Req() req: Request, @Res() res: Response) {
+    const { role, id } = req['token'] as Payload;
+
+    if (role === 'Employee') {
+      const projectUser = await this.projectsUserService.findAllFor(id);
+
+      if (projectUser.isErr()) {
+        return res.status(HttpStatus.NOT_FOUND).send('');
+      }
+
+      return res
+        .status(HttpStatus.OK)
+        .json(projectUser.content.map((pu) => pu.project));
+    }
+
+    const projectUser = await this.projectsUserService.findAll();
+
+    if (projectUser.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send('');
+    }
+
+    return res
+      .status(HttpStatus.OK)
+      .json(projectUser.content.map((pu) => pu.project));
   }
 }
