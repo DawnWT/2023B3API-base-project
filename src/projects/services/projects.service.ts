@@ -60,7 +60,7 @@ export class ProjectsService {
       const projectsUser = await this.projectUserRepository.find({
         where: { userId: id },
         relations: {
-          project: true,
+          project: { referringEmployee: true },
         },
       });
 
