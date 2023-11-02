@@ -72,8 +72,45 @@ export class ProjectsService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} project`;
+  async findOne(id: string): Promise<Option<Project>> {
+    try {
+      const project = await this.projectRepository.findOne({
+        where: { id },
+        relations: { referringEmployee: true },
+      });
+
+      if (!project) {
+        return Err('Could not find project');
+      }
+
+      return Ok(project);
+    } catch (error) {
+      return Err('Could not find project');
+    }
+  }
+
+  async findOneFor(
+    userId: string,
+    projectId: string,
+  ): Promise<Option<Project>> {
+    try {
+      const projectUser = await this.projectUserRepository.findOne({
+        where: { userId, projectId },
+        relations: {
+          project: { referringEmployee: true },
+        },
+      });
+
+      if (!projectUser) {
+        return Err('Could not find project');
+      }
+
+      const project = projectUser.project;
+
+      return Ok(project);
+    } catch (error) {
+      return Err('Could not find projects');
+    }
   }
 
   update(id: number) {
