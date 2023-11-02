@@ -46,4 +46,39 @@ export class ProjectUsersService {
       return Err('Could not create project-user');
     }
   }
+
+  async findOne(id: string): Promise<Option<ProjectUser>> {
+    try {
+      const projectUser = await this.projectUserRepository.findOne({
+        where: { id },
+      });
+
+      if (!projectUser) {
+        return Err('Project-user not found');
+      }
+
+      return Ok(projectUser);
+    } catch (error) {
+      return Err('Could not find project-user');
+    }
+  }
+
+  async findOneFor(
+    projectUserId: string,
+    userId: string,
+  ): Promise<Option<ProjectUser>> {
+    try {
+      const projectUser = await this.projectUserRepository.findOne({
+        where: { id: projectUserId, userId },
+      });
+
+      if (!projectUser) {
+        return Err('Project-user not found');
+      }
+
+      return Ok(projectUser);
+    } catch (error) {
+      return Err('Could not find project-user');
+    }
+  }
 }
