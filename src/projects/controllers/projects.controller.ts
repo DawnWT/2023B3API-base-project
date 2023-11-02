@@ -79,7 +79,21 @@ export class ProjectsController {
     if (role === 'Employee') {
       const projects = await this.projectsService.findAllFor(id);
 
-      return res.status(HttpStatus.OK).json(projects);
+      if (projects.isErr()) {
+        return res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send('Une erreur est survenue');
+      }
+
+      const cleanProjects = projects.content.map((p) => ({
+        ...p,
+        referringEmployee: this.userService.removeProps(
+          p.referringEmployee,
+          'password',
+        ),
+      }));
+
+      return res.status(HttpStatus.OK).json(cleanProjects);
     }
 
     const projects = await this.projectsService.findAll();
@@ -90,7 +104,15 @@ export class ProjectsController {
         .send('Une erreur est survenue');
     }
 
-    return res.status(HttpStatus.OK).json(projects.content);
+    const cleanProjects = projects.content.map((p) => ({
+      ...p,
+      referringEmployee: this.userService.removeProps(
+        p.referringEmployee,
+        'password',
+      ),
+    }));
+
+    return res.status(HttpStatus.OK).json(cleanProjects);
   }
 
   @Get(':id')
