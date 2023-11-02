@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 import { Err, Ok, Option } from '../../types/option';
+import { CreateUserDto } from '../dto/signup.dto';
 
 @Injectable()
 export class UsersService {
@@ -10,9 +11,18 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(
-    userDatas: Omit<User, 'id' | 'projectUser'>,
-  ): Promise<Option<User>> {
+  private removeProps<T extends keyof typeof User.prototype>(
+    user: User,
+    ...props: Array<T>
+  ): Omit<User, T> {
+    for (const prop of props) {
+      delete user[prop];
+    }
+
+    return user;
+  }
+
+  async create(userDatas: CreateUserDto): Promise<Option<User>> {
     const user = new User(userDatas);
     const savedUser = await this.userRepository.save(user);
 
@@ -71,17 +81,6 @@ export class UsersService {
     });
 
     return userExist;
-  }
-
-  removeProps<T extends keyof typeof User.prototype>(
-    user: User,
-    ...props: Array<T>
-  ): Omit<User, T> {
-    for (const prop of props) {
-      delete user[prop];
-    }
-
-    return user;
   }
 
   async getRole(id: string): Promise<Option<typeof User.prototype.role>> {
