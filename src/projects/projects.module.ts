@@ -7,6 +7,8 @@ import { User } from '../users/entities/user.entity';
 import { Project } from './entities/project.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ProjectUser } from './entities/project-user.entity';
+import { ProjectUsersController } from './controllers/project-users.controller';
+import { ProjectUsersService } from './services/project-users.service';
 
 @Module({
   imports: [
@@ -14,9 +16,10 @@ import { ProjectUser } from './entities/project-user.entity';
     JwtModule.register({}),
     UsersModule,
   ],
-  controllers: [ProjectsController],
+  controllers: [ProjectsController, ProjectUsersController],
   providers: [
     ProjectsService,
+    ProjectUsersService,
     {
       provide: 'APP_PIPE',
       useValue: new ValidationPipe({
