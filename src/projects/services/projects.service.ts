@@ -17,10 +17,12 @@ export class ProjectsService {
     private readonly userService: UsersService,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto): Promise<Option<Project>> {
-    const referringEmployeeOption = await this.userService.findOne(
-      createProjectDto.referringEmployeeId,
-    );
+  async create({
+    name,
+    referringEmployeeId,
+  }: CreateProjectDto): Promise<Option<Project>> {
+    const referringEmployeeOption =
+      await this.userService.findOne(referringEmployeeId);
 
     if (referringEmployeeOption.isErr()) {
       return Err(
@@ -29,7 +31,7 @@ export class ProjectsService {
     }
 
     const project = new Project({
-      ...createProjectDto,
+      name,
       referringEmployee: referringEmployeeOption.content,
     });
     let savedProject: Project;
