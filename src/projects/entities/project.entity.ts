@@ -27,8 +27,8 @@ export class Project {
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'referringEmployeeId' })
-  public referringEmployee!: User;
+  public referringEmployee: User;
 
   @OneToMany(() => ProjectUser, (projectUser) => projectUser.project)
-  public projectUser?: ProjectUser[];
+  public projectUser: ProjectUser[];
 }

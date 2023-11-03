@@ -32,9 +32,9 @@ export class ProjectUser {
 
   @ManyToOne(() => Project, (project) => project.projectUser)
   @JoinColumn({ name: 'projectId' })
-  public project?: Project;
+  public project: Project;
 
   @ManyToOne(() => User, (user) => user.projectUser)
   @JoinColumn({ name: 'userId' })
-  public user?: User;
+  public user: User;
 }
