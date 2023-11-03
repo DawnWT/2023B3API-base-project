@@ -32,15 +32,14 @@ export class ProjectsService {
       name,
       referringEmployee: referringEmployee.content,
     });
-    let savedProject: Project;
 
     try {
-      savedProject = await this.projectRepository.save(project);
+      const savedProject = await this.projectRepository.save(project);
+
+      return Ok(savedProject);
     } catch (error) {
       return Err('Could not create project');
     }
-
-    return Ok(savedProject);
   }
 
   async findAll(): Promise<Option<Array<Project>>> {
