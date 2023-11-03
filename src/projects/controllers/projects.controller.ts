@@ -59,17 +59,7 @@ export class ProjectsController {
         .send(projectOption.error);
     }
 
-    const cleanReferringEmployee = this.userService.removeProps(
-      projectOption.content.referringEmployee,
-      'password',
-    );
-
-    const cleanProject = {
-      ...projectOption.content,
-      referringEmployee: cleanReferringEmployee,
-    };
-
-    return res.status(HttpStatus.CREATED).json(cleanProject);
+    return res.status(HttpStatus.CREATED).json(projectOption.content);
   }
 
   @UseGuards(IsAuth)
@@ -86,15 +76,7 @@ export class ProjectsController {
           .send('Une erreur est survenue');
       }
 
-      const cleanProjects = projects.content.map((p) => ({
-        ...p,
-        referringEmployee: this.userService.removeProps(
-          p.referringEmployee,
-          'password',
-        ),
-      }));
-
-      return res.status(HttpStatus.OK).json(cleanProjects);
+      return res.status(HttpStatus.OK).json(projects.content);
     }
 
     const projects = await this.projectsService.findAll();
@@ -105,15 +87,7 @@ export class ProjectsController {
         .send('Une erreur est survenue');
     }
 
-    const cleanProjects = projects.content.map((p) => ({
-      ...p,
-      referringEmployee: this.userService.removeProps(
-        p.referringEmployee,
-        'password',
-      ),
-    }));
-
-    return res.status(HttpStatus.OK).json(cleanProjects);
+    return res.status(HttpStatus.OK).json(projects.content);
   }
 
   @UseGuards(IsAuth)
@@ -132,14 +106,7 @@ export class ProjectsController {
         return res.status(HttpStatus.FORBIDDEN).send('Forbidden');
       }
 
-      const cleanProject = {
-        ...project.content,
-        referringEmployee: this.userService.removeProps(
-          project.content.referringEmployee,
-          'password',
-        ),
-      };
-      return res.status(HttpStatus.OK).json(cleanProject);
+      return res.status(HttpStatus.OK).json(project.content);
     }
 
     const project = await this.projectsService.findOne(paramId);
@@ -150,14 +117,7 @@ export class ProjectsController {
         .send('This project does not exist');
     }
 
-    const cleanProject = {
-      ...project.content,
-      referringEmployee: this.userService.removeProps(
-        project.content.referringEmployee,
-        'password',
-      ),
-    };
-    return res.status(HttpStatus.OK).json(cleanProject);
+    return res.status(HttpStatus.OK).json(project.content);
   }
 
   @Patch(':id')

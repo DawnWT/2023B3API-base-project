@@ -71,19 +71,7 @@ export class ProjectUsersController {
       return res.status(HttpStatus.CONFLICT).send(projectUser.error);
     }
 
-    const cleanProjectUser = {
-      ...projectUser.content,
-      user: this.userService.removeProps(projectUser.content.user, 'password'),
-      project: {
-        ...projectUser.content.project,
-        referringEmployee: this.userService.removeProps(
-          projectUser.content.project.referringEmployee,
-          'password',
-        ),
-      },
-    };
-
-    return res.status(HttpStatus.CREATED).send(cleanProjectUser);
+    return res.status(HttpStatus.CREATED).send(projectUser.content);
   }
 
   @UseGuards(IsAuth)
