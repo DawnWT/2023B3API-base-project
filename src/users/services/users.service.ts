@@ -31,9 +31,7 @@ export class UsersService {
   async findAll(): Promise<Array<CleanUser>> {
     const users = await this.userRepository.find();
 
-    const cleanUsers = users.map((user) => this.removeProps(user, 'password'));
-
-    return cleanUsers;
+    return users;
   }
 
   async findOne(id: string): Promise<Option<CleanUser>>;
