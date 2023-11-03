@@ -41,20 +41,26 @@ export class UsersService {
     id: string,
     withPassword = false,
   ): Promise<Option<CleanUser | User>> {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
+    try {
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id = :id', { id })
+        .addSelect('user.password')
+        .getOne();
 
-    if (!user) {
-      return Err('User not found');
-    } else {
-      if (!withPassword) {
-        const cleanUser = this.removeProps(user, 'password');
+      if (!user) {
+        return Err('User not found');
+      } else {
+        if (!withPassword) {
+          const cleanUser = this.cleanUser(user);
 
-        return Ok(cleanUser);
+          return Ok(cleanUser);
+        }
+
+        return Ok(user);
       }
-
-      return Ok(user);
+    } catch (error) {
+      return Err('Could not find user');
     }
   }
 
@@ -68,20 +74,26 @@ export class UsersService {
     email: string,
     withPassword = false,
   ): Promise<Option<CleanUser | User>> {
-    const user = await this.userRepository.findOne({
-      where: { email },
-    });
+    try {
+      const user = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.email = :email', { email })
+        .addSelect('user.password')
+        .getOne();
 
-    if (!user) {
-      return Err('User not found');
-    } else {
-      if (!withPassword) {
-        const cleanUser = this.removeProps(user, 'password');
+      if (!user) {
+        return Err('User not found');
+      } else {
+        if (!withPassword) {
+          const cleanUser = this.cleanUser(user);
 
-        return Ok(cleanUser);
+          return Ok(cleanUser);
+        }
+
+        return Ok(user);
       }
-
-      return Ok(user);
+    } catch (error) {
+      return Err('Could not find user');
     }
   }
 
