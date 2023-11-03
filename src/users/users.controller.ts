@@ -35,12 +35,7 @@ export class UsersController {
         .send(userOption.error);
     }
 
-    const cleanUser = this.userService.removeProps(
-      userOption.content,
-      'password',
-    );
-
-    return res.status(HttpStatus.CREATED).json(cleanUser);
+    return res.status(HttpStatus.CREATED).json(userOption.content);
   }
 
   @Post('auth/login')
@@ -67,12 +62,7 @@ export class UsersController {
       return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
     }
 
-    const cleanUser = this.userService.removeProps(
-      userOption.content,
-      'password',
-    );
-
-    return res.status(HttpStatus.OK).json(cleanUser);
+    return res.status(HttpStatus.OK).json(userOption.content);
   }
 
   @UseGuards(IsAuth)
@@ -80,11 +70,7 @@ export class UsersController {
   async getUsers(@Res() res: Response) {
     const users = await this.userService.findAll();
 
-    const cleanUsers = users.map((u) =>
-      this.userService.removeProps(u, 'password'),
-    );
-
-    return res.status(HttpStatus.OK).json(cleanUsers);
+    return res.status(HttpStatus.OK).json(users);
   }
 
   @UseGuards(IsAuth)
@@ -96,11 +82,6 @@ export class UsersController {
       return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
     }
 
-    const cleanUser = this.userService.removeProps(
-      userOption.content,
-      'password',
-    );
-
-    return res.status(HttpStatus.OK).json(cleanUser);
+    return res.status(HttpStatus.OK).json(userOption.content);
   }
 }
