@@ -7,6 +7,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
+import { UserRoles } from '../types/utility';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -33,5 +34,5 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   @IsEnum(['Employee', 'Admin', 'ProjectManager'])
-  role?: 'Employee' | 'Admin' | 'ProjectManager';
+  role?: UserRoles;
 }
