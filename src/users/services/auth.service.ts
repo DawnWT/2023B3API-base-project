@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../entities/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users.service';
 import { compare, genSalt, hash } from 'bcrypt';
 import { Option, Err, Ok } from '../../types/option';
 import { Payload } from '../../types/payload';
 import { CleanUser } from '../types/utility';
+import { CreateUserDto } from '../dto/signup.dto';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +26,7 @@ export class AuthService {
     password,
     username,
     role,
-  }: Omit<User, 'id' | 'projectUser'>): Promise<Option<CleanUser>> {
+  }: CreateUserDto): Promise<Option<CleanUser>> {
     const userExist = await this.userService.userExist({ username, email });
 
     if (userExist) {
