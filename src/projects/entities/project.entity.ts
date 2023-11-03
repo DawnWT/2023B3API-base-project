@@ -1,5 +1,6 @@
 import {
   Column,
+  DeepPartial,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -11,7 +12,7 @@ import { ProjectUser } from './project-user.entity';
 
 @Entity()
 export class Project {
-  constructor(datas: Omit<Project, 'id'>) {
+  constructor(datas: DeepPartial<Project>) {
     Object.assign(this, datas);
   }
 

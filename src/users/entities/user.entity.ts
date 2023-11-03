@@ -1,10 +1,15 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { CreateUserDto } from '../dto/signup.dto';
+import {
+  Column,
+  DeepPartial,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ProjectUser } from '../../projects/entities/project-user.entity';
 
 @Entity()
 export class User {
-  constructor(datas: CreateUserDto) {
+  constructor(datas: DeepPartial<User>) {
     Object.assign(this, datas);
   }
 
