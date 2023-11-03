@@ -22,7 +22,7 @@ export class User {
   @Column({ unique: true, type: 'text' })
   public email!: string; // cette propriété doit porter une contrainte d'unicité
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', select: false })
   public password!: string;
 
   @Column({
