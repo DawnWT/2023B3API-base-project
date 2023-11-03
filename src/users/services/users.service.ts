@@ -12,13 +12,8 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  removeProps<T extends keyof typeof User.prototype>(
-    user: User,
-    ...props: Array<T>
-  ): Omit<User, T> {
-    for (const prop of props) {
-      delete user[prop];
-    }
+  private cleanUser(user: User): CleanUser {
+    delete user.password;
 
     return user;
   }
