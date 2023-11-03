@@ -20,9 +20,10 @@ export class UsersService {
 
   async create(userDatas: CreateUserDto): Promise<Option<CleanUser>> {
     const user = new User(userDatas);
+
     const savedUser = await this.userRepository.save(user);
 
-    const cleanUser = this.removeProps(savedUser, 'password');
+    const cleanUser = this.cleanUser(savedUser);
 
     return Ok(cleanUser);
   }
