@@ -4,7 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { IsAuth } from './isAuth.guard';
+import { IsAuth } from './is-auth.guard';
 import { JwtService } from '@nestjs/jwt';
 import { Payload } from '../../types/payload';
 

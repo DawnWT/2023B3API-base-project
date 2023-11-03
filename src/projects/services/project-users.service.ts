@@ -21,21 +21,21 @@ export class ProjectUsersService {
   ): Promise<Option<ProjectUser>> {
     const { projectId, userId, startDate, endDate } = createProjectUserDto;
 
-    const projectOption = await this.projectService.findOne(projectId);
-    if (projectOption.isErr()) {
+    const project = await this.projectService.findOne(projectId);
+    if (project.isErr()) {
       return Err('Project not found');
     }
 
-    const userOption = await this.userService.findOne(userId);
-    if (userOption.isErr()) {
+    const user = await this.userService.findOne(userId);
+    if (user.isErr()) {
       return Err('User not found');
     }
 
     const projectUser = new ProjectUser({
       startDate,
       endDate,
-      project: projectOption.content,
-      user: userOption.content,
+      project: project.content,
+      user: user.content,
     });
 
     try {

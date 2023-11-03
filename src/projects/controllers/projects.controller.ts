@@ -15,15 +15,15 @@ import { ProjectsService } from '../services/projects.service';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UsersService } from '../../users/services/users.service';
 import { Request, Response } from 'express';
-import { IsAdmin } from '../../users/guards/isAdmin.guard';
-import { IsAuth } from '../../users/guards/isAuth.guard';
+import { IsAdmin } from '../../users/guards/is-admin.guard';
+import { IsAuth } from '../../users/guards/is-auth.guard';
 import { Payload } from '../../types/payload';
-import { GetProjectParamsDto } from '../dto/get-project.dto';
+import { GetProjectDto } from '../dto/get-project.dto';
 
 @Controller('projects')
 export class ProjectsController {
   constructor(
-    private readonly projectsService: ProjectsService,
+    private readonly projectService: ProjectsService,
     private readonly userService: UsersService,
   ) {}
 
@@ -33,33 +33,31 @@ export class ProjectsController {
     @Body() { name, referringEmployeeId }: CreateProjectDto,
     @Res() res: Response,
   ) {
-    const referringEmployeeRoleOption =
+    const referringEmployeeRole =
       await this.userService.getRole(referringEmployeeId);
 
-    if (referringEmployeeRoleOption.isErr()) {
+    if (referringEmployeeRole.isErr()) {
       return res
         .status(HttpStatus.BAD_REQUEST)
         .send('Referring employee not found');
     }
 
-    if (referringEmployeeRoleOption.content !== 'ProjectManager') {
+    if (referringEmployeeRole.content !== 'ProjectManager') {
       return res
         .status(HttpStatus.UNAUTHORIZED)
         .send('Referring employee is not a project manager');
     }
 
-    const projectOption = await this.projectsService.create({
+    const project = await this.projectService.create({
       name,
       referringEmployeeId,
     });
 
-    if (projectOption.isErr()) {
-      return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(projectOption.error);
+    if (project.isErr()) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(project.error);
     }
 
-    return res.status(HttpStatus.CREATED).json(projectOption.content);
+    return res.status(HttpStatus.CREATED).json(project.content);
   }
 
   @UseGuards(IsAuth)
@@ -68,7 +66,7 @@ export class ProjectsController {
     const { id, role } = req['token'] as Payload;
 
     if (role === 'Employee') {
-      const projects = await this.projectsService.findAllFor(id);
+      const projects = await this.projectService.findAllFor(id);
 
       if (projects.isErr()) {
         return res
@@ -79,7 +77,7 @@ export class ProjectsController {
       return res.status(HttpStatus.OK).json(projects.content);
     }
 
-    const projects = await this.projectsService.findAll();
+    const projects = await this.projectService.findAll();
 
     if (projects.isErr()) {
       return res
@@ -93,14 +91,14 @@ export class ProjectsController {
   @UseGuards(IsAuth)
   @Get(':id')
   async findOne(
-    @Param() { id: paramId }: GetProjectParamsDto,
+    @Param() { id: paramId }: GetProjectDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const { id: tokenId, role } = req['token'] as Payload;
 
     if (role === 'Employee') {
-      const project = await this.projectsService.findOneFor(tokenId, paramId);
+      const project = await this.projectService.findOneFor(tokenId, paramId);
 
       if (project.isErr()) {
         return res.status(HttpStatus.FORBIDDEN).send('Forbidden');
@@ -109,7 +107,7 @@ export class ProjectsController {
       return res.status(HttpStatus.OK).json(project.content);
     }
 
-    const project = await this.projectsService.findOne(paramId);
+    const project = await this.projectService.findOne(paramId);
 
     if (project.isErr()) {
       return res
@@ -122,11 +120,11 @@ export class ProjectsController {
 
   @Patch(':id')
   update(@Param('id') id: string) {
-    return this.projectsService.update(+id);
+    return this.projectService.update(+id);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.projectsService.remove(+id);
+    return this.projectService.remove(+id);
   }
 }

@@ -21,18 +21,16 @@ export class ProjectsService {
     name,
     referringEmployeeId,
   }: CreateProjectDto): Promise<Option<Project>> {
-    const referringEmployeeOption =
+    const referringEmployee =
       await this.userService.findOne(referringEmployeeId);
 
-    if (referringEmployeeOption.isErr()) {
-      return Err(
-        'Could not create new Project\n' + referringEmployeeOption.error,
-      );
+    if (referringEmployee.isErr()) {
+      return Err('Could not create new Project\n' + referringEmployee.error);
     }
 
     const project = new Project({
       name,
-      referringEmployee: referringEmployeeOption.content,
+      referringEmployee: referringEmployee.content,
     });
     let savedProject: Project;
 

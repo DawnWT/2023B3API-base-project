@@ -11,18 +11,18 @@ import {
 } from '@nestjs/common';
 import { ProjectsService } from '../services/projects.service';
 import { UsersService } from '../../users/services/users.service';
-import { IsAuth } from '../../users/guards/isAuth.guard';
+import { IsAuth } from '../../users/guards/is-auth.guard';
 import { CreateProjectUserDto } from '../dto/create-project-user.dto';
 import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
 import { ProjectUsersService } from '../services/project-users.service';
-import { GetProjectUserParamDto } from '../dto/get-project-user.dto';
+import { GetProjectUserDto } from '../dto/get-project-user.dto';
 
 @Controller('project-users')
 export class ProjectUsersController {
   constructor(
-    private readonly projectsService: ProjectsService,
-    private readonly projectsUserService: ProjectUsersService,
+    private readonly projectService: ProjectsService,
+    private readonly projectUserService: ProjectUsersService,
     private readonly userService: UsersService,
   ) {}
 
@@ -40,7 +40,7 @@ export class ProjectUsersController {
     }
 
     const userExist = await this.userService.userExist({ id: userId });
-    const projectExist = await this.projectsService.projectExist(projectId);
+    const projectExist = await this.projectService.projectExist(projectId);
 
     if (!userExist) {
       return res.status(HttpStatus.NOT_FOUND).send('User not found');
@@ -60,7 +60,7 @@ export class ProjectUsersController {
       return res.status(HttpStatus.CONFLICT).send('User not available');
     }
 
-    const projectUser = await this.projectsUserService.create({
+    const projectUser = await this.projectUserService.create({
       startDate,
       endDate,
       projectId,
@@ -80,7 +80,7 @@ export class ProjectUsersController {
     const { role, id } = req['token'] as Payload;
 
     if (role === 'Employee') {
-      const projectUser = await this.projectsUserService.findAllFor(id);
+      const projectUser = await this.projectUserService.findAllFor(id);
 
       if (projectUser.isErr()) {
         return res.status(HttpStatus.NOT_FOUND).send('');
@@ -91,7 +91,7 @@ export class ProjectUsersController {
         .json(projectUser.content.map((pu) => pu.project));
     }
 
-    const projectUser = await this.projectsUserService.findAll();
+    const projectUser = await this.projectUserService.findAll();
 
     if (projectUser.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send('');
@@ -105,14 +105,14 @@ export class ProjectUsersController {
   @UseGuards(IsAuth)
   @Get(':id')
   async findOne(
-    @Param() { id: paramId }: GetProjectUserParamDto,
+    @Param() { id: paramId }: GetProjectUserDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const { role, id: tokenId } = req['token'] as Payload;
 
     if (role === 'Employee') {
-      const projectUser = await this.projectsUserService.findOneFor(
+      const projectUser = await this.projectUserService.findOneFor(
         paramId,
         tokenId,
       );
@@ -124,7 +124,7 @@ export class ProjectUsersController {
       return res.status(HttpStatus.OK).json(projectUser.content);
     }
 
-    const projectUser = await this.projectsUserService.findOne(paramId);
+    const projectUser = await this.projectUserService.findOne(paramId);
 
     if (projectUser.isErr()) {
       return res.status(HttpStatus.NOT_FOUND).send(projectUser.error);

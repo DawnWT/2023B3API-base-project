@@ -11,10 +11,10 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './services/users.service';
 import { Request, Response } from 'express';
-import { IsAuth } from './guards/isAuth.guard';
+import { IsAuth } from './guards/is-auth.guard';
 import { CreateUserDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
-import { GetUserDto } from './dto/getUser.dto';
+import { GetUserDto } from './dto/get-user.dto';
 import { AuthService } from './services/auth.service';
 import { Payload } from '../types/payload';
 
@@ -27,28 +27,26 @@ export class UsersController {
 
   @Post('auth/sign-up')
   async signup(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
-    const userOption = await this.authService.signup(createUserDto);
+    const user = await this.authService.signup(createUserDto);
 
-    if (userOption.isErr()) {
-      return res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(userOption.error);
+    if (user.isErr()) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
     }
 
-    return res.status(HttpStatus.CREATED).json(userOption.content);
+    return res.status(HttpStatus.CREATED).json(user.content);
   }
 
   @Post('auth/login')
   async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    const accessTokenOption = await this.authService.login(loginDto);
+    const accessToken = await this.authService.login(loginDto);
 
-    if (accessTokenOption.isErr()) {
+    if (accessToken.isErr()) {
       return res.status(HttpStatus.UNAUTHORIZED).send('Wrong credentials');
     }
 
     return res
       .status(HttpStatus.CREATED)
-      .json({ access_token: accessTokenOption.content.access_token });
+      .json({ access_token: accessToken.content.access_token });
   }
 
   @UseGuards(IsAuth)
@@ -56,13 +54,13 @@ export class UsersController {
   async getSelf(@Req() req: Request, @Res() res: Response) {
     const { id } = req['token'] as Payload;
 
-    const userOption = await this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
 
-    if (userOption.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
+    if (user.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send(user.error);
     }
 
-    return res.status(HttpStatus.OK).json(userOption.content);
+    return res.status(HttpStatus.OK).json(user.content);
   }
 
   @UseGuards(IsAuth)
@@ -76,12 +74,12 @@ export class UsersController {
   @UseGuards(IsAuth)
   @Get(':id')
   async getUser(@Param() { id }: GetUserDto, @Res() res: Response) {
-    const userOption = await this.userService.findOne(id);
+    const user = await this.userService.findOne(id);
 
-    if (userOption.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(userOption.error);
+    if (user.isErr()) {
+      return res.status(HttpStatus.NOT_FOUND).send(user.error);
     }
 
-    return res.status(HttpStatus.OK).json(userOption.content);
+    return res.status(HttpStatus.OK).json(user.content);
   }
 }

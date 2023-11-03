@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsUUID } from 'class-validator';
 
-export class GetProjectUserParamDto {
+export class GetProjectUserDto {
   @IsUUID(4)
   @IsNotEmpty()
   id!: string;

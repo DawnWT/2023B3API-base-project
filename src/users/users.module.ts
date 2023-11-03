@@ -5,9 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './services/auth.service';
-import { IsAuth } from './guards/isAuth.guard';
-import { IsAdmin } from './guards/isAdmin.guard';
-import { IsProjectManager } from './guards/isProjectManager.guard.';
+import { IsAuth } from './guards/is-auth.guard';
+import { IsAdmin } from './guards/is-admin.guard';
+import { IsProjectManager } from './guards/is-project-manager.guard';
 import { Project } from '../projects/entities/project.entity';
 import { ProjectUser } from '../projects/entities/project-user.entity';
 

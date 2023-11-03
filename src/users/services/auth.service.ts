@@ -58,18 +58,18 @@ export class AuthService {
     email: string;
     password: string;
   }): Promise<Option<{ access_token: string }>> {
-    const userOption = await this.userService.finOneByEmail(email, true);
+    const user = await this.userService.finOneByEmail(email, true);
 
-    if (userOption.isErr()) {
+    if (user.isErr()) {
       return Err('User not found');
     }
 
-    const isMatch = await compare(password, userOption.content.password);
+    const isMatch = await compare(password, user.content.password);
 
     if (isMatch) {
       const payload: Payload = {
-        id: userOption.content.id,
-        role: userOption.content.role,
+        id: user.content.id,
+        role: user.content.role,
       };
       return Ok({
         access_token: this.jwtService.sign(payload, {
