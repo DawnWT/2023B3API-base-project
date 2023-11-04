@@ -13,10 +13,11 @@ import { ProjectsService } from '../services/projects.service';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { UsersService } from '../../users/services/users.service';
 import { Request, Response } from 'express';
-import { IsAdmin } from '../../users/guards/is-admin.guard';
 import { IsAuth } from '../../users/guards/is-auth.guard';
 import { Payload } from '../../types/payload';
 import { GetProjectDto } from '../dto/get-project.dto';
+import { IsRole } from '../../users/guards/is-role.guard';
+import { Roles } from '../../users/decorators/roles.decorator';
 
 @Controller('projects')
 export class ProjectsController {
@@ -25,7 +26,8 @@ export class ProjectsController {
     private readonly userService: UsersService,
   ) {}
 
-  @UseGuards(IsAdmin)
+  @Roles('Admin')
+  @UseGuards(IsAuth, IsRole)
   @Post()
   async create(
     @Body() { name, referringEmployeeId }: CreateProjectDto,

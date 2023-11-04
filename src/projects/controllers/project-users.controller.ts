@@ -15,24 +15,20 @@ import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
 import { ProjectUsersService } from '../services/project-users.service';
 import { GetProjectUserDto } from '../dto/get-project-user.dto';
+import { Roles } from '../../users/decorators/roles.decorator';
+import { IsRole } from '../../users/guards/is-role.guard';
 
 @Controller('project-users')
 export class ProjectUsersController {
   constructor(private readonly projectUserService: ProjectUsersService) {}
 
-  @UseGuards(IsAuth)
+  @Roles('Admin', 'ProjectManager')
+  @UseGuards(IsAuth, IsRole)
   @Post()
   async create(
     @Body() { startDate, endDate, projectId, userId }: CreateProjectUserDto,
-    @Req() req: Request,
     @Res() res: Response,
   ) {
-    const { role } = req['token'] as Payload;
-
-    if (role === 'Employee') {
-      return res.status(HttpStatus.UNAUTHORIZED).send('Unauthorized');
-    }
-
     const projectUser = await this.projectUserService.create({
       startDate,
       endDate,
