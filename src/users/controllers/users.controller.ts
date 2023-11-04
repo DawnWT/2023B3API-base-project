@@ -9,14 +9,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './services/users.service';
+import { UsersService } from '../services/users.service';
 import { Request, Response } from 'express';
-import { IsAuth } from './guards/is-auth.guard';
-import { CreateUserDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
-import { GetUserDto } from './dto/get-user.dto';
-import { AuthService } from './services/auth.service';
-import { Payload } from '../types/payload';
+import { IsAuth } from '../guards/is-auth.guard';
+import { CreateUserDto } from '../dto/signup.dto';
+import { LoginDto } from '../dto/login.dto';
+import { GetUserDto } from '../dto/get-user.dto';
+import { AuthService } from '../services/auth.service';
+import { Payload } from '../../types/payload';
 
 @Controller('users')
 export class UsersController {
