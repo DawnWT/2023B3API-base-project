@@ -33,21 +33,6 @@ export class ProjectsController {
     @Body() { name, referringEmployeeId }: CreateProjectDto,
     @Res() res: Response,
   ) {
-    const referringEmployeeRole =
-      await this.userService.getRole(referringEmployeeId);
-
-    if (referringEmployeeRole.isErr()) {
-      return res
-        .status(HttpStatus.BAD_REQUEST)
-        .send('Referring employee not found');
-    }
-
-    if (referringEmployeeRole.content !== 'ProjectManager') {
-      return res
-        .status(HttpStatus.UNAUTHORIZED)
-        .send('Referring employee is not a project manager');
-    }
-
     const project = await this.projectService.create({
       name,
       referringEmployeeId,
@@ -56,8 +41,14 @@ export class ProjectsController {
     if (project.isErr()) {
       if (project.error.type === 'UserNotFoundException') {
         return res
-          .status(HttpStatus.NOT_FOUND)
+          .status(HttpStatus.BAD_REQUEST)
           .send('Referring employee not found');
+      }
+
+      if (project.error.type === 'UserNotAllowedException') {
+        return res
+          .status(HttpStatus.UNAUTHORIZED)
+          .send('Referring employee is not a project manager');
       }
 
       return res

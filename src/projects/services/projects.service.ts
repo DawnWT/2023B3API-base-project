@@ -5,7 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, TypeORMError } from 'typeorm';
 import { Err, Ok, Option } from '../../types/option';
 import { UsersService } from '../../users/services/users.service';
-import { UserNotFoundException } from '../../users/types/error';
+import {
+  UserNotAllowedException,
+  UserNotFoundException,
+} from '../../users/types/error';
 import {
   BaseError,
   DatabaseInternalError,
@@ -28,13 +31,17 @@ export class ProjectsService {
     name,
     referringEmployeeId,
   }: CreateProjectDto): Promise<
-    Option<Project, UserNotFoundException | BaseError>
+    Option<Project, UserNotFoundException | UserNotAllowedException | BaseError>
   > {
     const referringEmployee =
       await this.userService.findOne(referringEmployeeId);
 
     if (referringEmployee.isErr()) {
       return referringEmployee;
+    }
+
+    if (referringEmployee.content.role !== 'ProjectManager') {
+      return Err(new UserNotAllowedException());
     }
 
     const project = new Project({
