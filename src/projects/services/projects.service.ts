@@ -148,12 +148,4 @@ export class ProjectsService {
       }
     }
   }
-
-  update(id: number) {
-    return `This action updates a #${id} project`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} project`;
-  }
 }

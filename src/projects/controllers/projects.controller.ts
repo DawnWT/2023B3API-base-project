@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseGuards,
   Res,
   HttpStatus,
@@ -127,15 +125,5 @@ export class ProjectsController {
     }
 
     return res.status(HttpStatus.OK).json(project.content);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.projectService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectService.remove(+id);
   }
 }
