@@ -100,7 +100,13 @@ export class ProjectsController {
       const project = await this.projectService.findOneFor(tokenId, paramId);
 
       if (project.isErr()) {
-        return res.status(HttpStatus.FORBIDDEN).send('Forbidden');
+        if (project.error.type === 'ProjectNotFoundException') {
+          return res.status(HttpStatus.FORBIDDEN).send('Forbidden');
+        }
+
+        return res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send('Internal server error');
       }
 
       return res.status(HttpStatus.OK).json(project.content);

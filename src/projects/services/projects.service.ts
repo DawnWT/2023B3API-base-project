@@ -14,10 +14,7 @@ import {
   DatabaseInternalError,
   UnknownError,
 } from '../../types/error';
-import {
-  ProjectNotFoundException,
-  ProjectUserNotFoundException,
-} from '../types/error';
+import { ProjectNotFoundException } from '../types/error';
 
 @Injectable()
 export class ProjectsService {
@@ -129,12 +126,7 @@ export class ProjectsService {
   async findOneFor(
     userId: string,
     projectId: string,
-  ): Promise<
-    Option<
-      Project,
-      ProjectNotFoundException | ProjectUserNotFoundException | BaseError
-    >
-  > {
+  ): Promise<Option<Project, ProjectNotFoundException | BaseError>> {
     try {
       const project = await this.projectRepository.findOne({
         where: { id: projectId, projectUser: { userId } },
