@@ -30,7 +30,17 @@ export class UsersController {
     const user = await this.authService.signup(createUserDto);
 
     if (user.isErr()) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(user.error);
+      const { error } = user;
+
+      if (error.type === 'UserAlreadyExistException') {
+        return res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send('This user already exist');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.CREATED).json(user.content);
@@ -41,7 +51,14 @@ export class UsersController {
     const accessToken = await this.authService.login(loginDto);
 
     if (accessToken.isErr()) {
-      return res.status(HttpStatus.UNAUTHORIZED).send('Wrong credentials');
+      const { error } = accessToken;
+      if (error.type === 'WrongPasswordException') {
+        return res.status(HttpStatus.UNAUTHORIZED).send('Wrong credentials');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res
@@ -57,7 +74,15 @@ export class UsersController {
     const user = await this.userService.findOne(id);
 
     if (user.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(user.error);
+      const { error } = user;
+
+      if (error.type === 'UserNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send(user.error);
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.OK).json(user.content);
@@ -68,7 +93,13 @@ export class UsersController {
   async getUsers(@Res() res: Response) {
     const users = await this.userService.findAll();
 
-    return res.status(HttpStatus.OK).json(users);
+    if (users.isErr()) {
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
+    }
+
+    return res.status(HttpStatus.OK).json(users.content);
   }
 
   @UseGuards(IsAuth)
@@ -77,7 +108,15 @@ export class UsersController {
     const user = await this.userService.findOne(id);
 
     if (user.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(user.error);
+      const { error } = user;
+
+      if (error.type === 'UserNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send(user.error);
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.OK).json(user.content);

@@ -54,7 +54,15 @@ export class ProjectsController {
     });
 
     if (project.isErr()) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(project.error);
+      if (project.error.type === 'UserNotFoundException') {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send('Referring employee not found');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.CREATED).json(project.content);
@@ -110,9 +118,15 @@ export class ProjectsController {
     const project = await this.projectService.findOne(paramId);
 
     if (project.isErr()) {
+      if (project.error.type === 'ProjectNotFoundException') {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send('This project does not exist');
+      }
+
       return res
-        .status(HttpStatus.NOT_FOUND)
-        .send('This project does not exist');
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.OK).json(project.content);

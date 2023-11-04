@@ -9,8 +9,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ProjectsService } from '../services/projects.service';
-import { UsersService } from '../../users/services/users.service';
 import { IsAuth } from '../../users/guards/is-auth.guard';
 import { CreateProjectUserDto } from '../dto/create-project-user.dto';
 import { Request, Response } from 'express';
@@ -20,11 +18,7 @@ import { GetProjectUserDto } from '../dto/get-project-user.dto';
 
 @Controller('project-users')
 export class ProjectUsersController {
-  constructor(
-    private readonly projectService: ProjectsService,
-    private readonly projectUserService: ProjectUsersService,
-    private readonly userService: UsersService,
-  ) {}
+  constructor(private readonly projectUserService: ProjectUsersService) {}
 
   @UseGuards(IsAuth)
   @Post()
@@ -39,27 +33,6 @@ export class ProjectUsersController {
       return res.status(HttpStatus.UNAUTHORIZED).send('Unauthorized');
     }
 
-    const userExist = await this.userService.userExist({ id: userId });
-    const projectExist = await this.projectService.projectExist(projectId);
-
-    if (!userExist) {
-      return res.status(HttpStatus.NOT_FOUND).send('User not found');
-    }
-
-    if (!projectExist) {
-      return res.status(HttpStatus.NOT_FOUND).send('Project not found');
-    }
-
-    const userIsAvailable = await this.userService.userIsAvailable(
-      userId,
-      startDate,
-      endDate,
-    );
-
-    if (!userIsAvailable) {
-      return res.status(HttpStatus.CONFLICT).send('User not available');
-    }
-
     const projectUser = await this.projectUserService.create({
       startDate,
       endDate,
@@ -68,7 +41,25 @@ export class ProjectUsersController {
     });
 
     if (projectUser.isErr()) {
-      return res.status(HttpStatus.CONFLICT).send(projectUser.error);
+      if (projectUser.error.type === 'ProjectNotFoundException') {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send('Project with given id not found');
+      }
+
+      if (projectUser.error.type === 'UserNotFoundException') {
+        return res
+          .status(HttpStatus.NOT_FOUND)
+          .send('User with given id not found');
+      }
+
+      if (projectUser.error.type === 'UserNotAvailableException') {
+        return res.status(HttpStatus.CONFLICT).send('User not available');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.CREATED).send(projectUser.content);
@@ -113,12 +104,20 @@ export class ProjectUsersController {
 
     if (role === 'Employee') {
       const projectUser = await this.projectUserService.findOneFor(
-        paramId,
         tokenId,
+        paramId,
       );
 
       if (projectUser.isErr()) {
-        return res.status(HttpStatus.NOT_FOUND).send(projectUser.error);
+        if (projectUser.error.type === 'ProjectUserNotFoundException') {
+          return res
+            .status(HttpStatus.NOT_FOUND)
+            .send('Project User not found');
+        }
+
+        return res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .send('Internal server error');
       }
 
       return res.status(HttpStatus.OK).json(projectUser.content);
@@ -127,7 +126,13 @@ export class ProjectUsersController {
     const projectUser = await this.projectUserService.findOne(paramId);
 
     if (projectUser.isErr()) {
-      return res.status(HttpStatus.NOT_FOUND).send(projectUser.error);
+      if (projectUser.error.type === 'ProjectUserNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send('Project User not found');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.OK).json(projectUser.content);
