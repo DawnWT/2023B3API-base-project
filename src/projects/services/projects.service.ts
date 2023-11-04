@@ -157,12 +157,4 @@ export class ProjectsService {
   remove(id: number) {
     return `This action removes a #${id} project`;
   }
-
-  async projectExist(id: string): Promise<boolean> {
-    const project = await this.projectRepository.exist({
-      where: { id },
-    });
-
-    return project;
-  }
 }

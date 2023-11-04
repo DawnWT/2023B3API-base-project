@@ -165,22 +165,6 @@ export class UsersService {
     return `This action removes a #${id} user`;
   }
 
-  async userExist({
-    id,
-    username,
-    email,
-  }: {
-    id?: string;
-    username?: string;
-    email?: string;
-  }): Promise<boolean> {
-    const userExist = await this.userRepository.exist({
-      where: [{ username }, { email }, { id }],
-    });
-
-    return userExist;
-  }
-
   async getRole(
     id: string,
   ): Promise<Option<UserRoles, UserNotFoundException | BaseError>> {
