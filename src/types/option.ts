@@ -14,9 +14,7 @@ interface Err<K extends BaseOptionException<unknown>>
   error: K;
 }
 
-export type Option<T, K extends BaseOptionException<unknown> = null> =
-  | Ok<T>
-  | Err<K>;
+export type Option<T, K extends BaseOptionException<unknown>> = Ok<T> | Err<K>;
 
 export const Ok = function <T>(content: T): Option<T, null> {
   return {
