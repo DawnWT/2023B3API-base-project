@@ -4,7 +4,7 @@ import { User } from '../entities/user.entity';
 import { QueryFailedError, Repository, TypeORMError } from 'typeorm';
 import { Err, Ok, Option } from '../../types/option';
 import { CreateUserDto } from '../dto/signup.dto';
-import { CleanUser, UserRoles } from '../types/utility';
+import { CleanUser } from '../types/utility';
 import {
   UserAlreadyExistException,
   UserNotFoundException,
@@ -163,31 +163,6 @@ export class UsersService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
-  }
-
-  async getRole(
-    id: string,
-  ): Promise<Option<UserRoles, UserNotFoundException | BaseError>> {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { id },
-        select: { role: true },
-      });
-
-      if (!user) {
-        return Err(new UserNotFoundException());
-      } else {
-        return Ok(user.role);
-      }
-    } catch (error) {
-      if (error instanceof TypeORMError) {
-        return Err(new DatabaseInternalError(error));
-      }
-
-      if (error instanceof Error) {
-        return Err(new UnknownError(error));
-      }
-    }
   }
 
   async userIsAvailable(
