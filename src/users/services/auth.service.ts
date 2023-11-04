@@ -6,6 +6,12 @@ import { Option, Err, Ok } from '../../types/option';
 import { Payload } from '../../types/payload';
 import { CleanUser } from '../types/utility';
 import { CreateUserDto } from '../dto/signup.dto';
+import { BaseError } from '../../types/error';
+import {
+  UserAlreadyExistException,
+  UserNotFoundException,
+  WrongPasswordException,
+} from '../types/error';
 
 @Injectable()
 export class AuthService {
@@ -26,13 +32,9 @@ export class AuthService {
     password,
     username,
     role,
-  }: CreateUserDto): Promise<Option<CleanUser>> {
-    const userExist = await this.userService.userExist({ username, email });
-
-    if (userExist) {
-      return Err('User already exist');
-    }
-
+  }: CreateUserDto): Promise<
+    Option<CleanUser, UserAlreadyExistException | BaseError>
+  > {
     const hashedPassword = await this.hashPassword(password);
 
     const user = {
@@ -45,7 +47,7 @@ export class AuthService {
     const savedUser = await this.userService.create(user);
 
     if (savedUser.isErr()) {
-      return Err(savedUser.error);
+      return savedUser;
     }
 
     return Ok(savedUser.content);
@@ -57,11 +59,16 @@ export class AuthService {
   }: {
     email: string;
     password: string;
-  }): Promise<Option<{ access_token: string }>> {
+  }): Promise<
+    Option<
+      { access_token: string },
+      WrongPasswordException | UserNotFoundException | BaseError
+    >
+  > {
     const user = await this.userService.finOneByEmail(email, true);
 
     if (user.isErr()) {
-      return Err('User not found');
+      return user;
     }
 
     const isMatch = await compare(password, user.content.password);
@@ -77,7 +84,7 @@ export class AuthService {
         }),
       });
     } else {
-      return Err('Wrong password');
+      return Err(new WrongPasswordException());
     }
   }
 }

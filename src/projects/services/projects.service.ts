@@ -2,30 +2,39 @@ import { Injectable } from '@nestjs/common';
 import { CreateProjectDto } from '../dto/create-project.dto';
 import { Project } from '../entities/project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, TypeORMError } from 'typeorm';
 import { Err, Ok, Option } from '../../types/option';
 import { UsersService } from '../../users/services/users.service';
-import { ProjectUser } from '../entities/project-user.entity';
+import { UserNotFoundException } from '../../users/types/error';
+import {
+  BaseError,
+  DatabaseInternalError,
+  UnknownError,
+} from '../../types/error';
+import {
+  ProjectNotFoundException,
+  ProjectUserNotFoundException,
+} from '../types/error';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
-    @InjectRepository(ProjectUser)
-    private readonly projectUserRepository: Repository<ProjectUser>,
     private readonly userService: UsersService,
   ) {}
 
   async create({
     name,
     referringEmployeeId,
-  }: CreateProjectDto): Promise<Option<Project>> {
+  }: CreateProjectDto): Promise<
+    Option<Project, UserNotFoundException | BaseError>
+  > {
     const referringEmployee =
       await this.userService.findOne(referringEmployeeId);
 
     if (referringEmployee.isErr()) {
-      return Err('Could not create new Project\n' + referringEmployee.error);
+      return referringEmployee;
     }
 
     const project = new Project({
@@ -38,11 +47,17 @@ export class ProjectsService {
 
       return Ok(savedProject);
     } catch (error) {
-      return Err('Could not create project');
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
     }
   }
 
-  async findAll(): Promise<Option<Array<Project>>> {
+  async findAll(): Promise<Option<Array<Project>, BaseError>> {
     try {
       const projects = await this.projectRepository.find({
         relations: { referringEmployee: true },
@@ -50,28 +65,38 @@ export class ProjectsService {
 
       return Ok(projects);
     } catch (error) {
-      return Err('Could not find projects');
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
     }
   }
 
-  async findAllFor(id: string): Promise<Option<Array<Project>>> {
+  async findAllFor(id: string): Promise<Option<Array<Project>, BaseError>> {
     try {
-      const projectsUser = await this.projectUserRepository.find({
-        where: { userId: id },
-        relations: {
-          project: { referringEmployee: true },
-        },
+      const projects = await this.projectRepository.find({
+        where: { projectUser: { userId: id } },
+        relations: { referringEmployee: true },
       });
-
-      const projects = projectsUser.map((projectUser) => projectUser.project);
 
       return Ok(projects);
     } catch (error) {
-      return Err('Could not find projects');
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
     }
   }
 
-  async findOne(id: string): Promise<Option<Project>> {
+  async findOne(
+    id: string,
+  ): Promise<Option<Project, ProjectNotFoundException | BaseError>> {
     try {
       const project = await this.projectRepository.findOne({
         where: { id },
@@ -79,36 +104,49 @@ export class ProjectsService {
       });
 
       if (!project) {
-        return Err('Could not find project');
+        return Err(new ProjectNotFoundException());
       }
 
       return Ok(project);
     } catch (error) {
-      return Err('Could not find project');
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
     }
   }
 
   async findOneFor(
     userId: string,
     projectId: string,
-  ): Promise<Option<Project>> {
+  ): Promise<
+    Option<
+      Project,
+      ProjectNotFoundException | ProjectUserNotFoundException | BaseError
+    >
+  > {
     try {
-      const projectUser = await this.projectUserRepository.findOne({
-        where: { userId, projectId },
-        relations: {
-          project: { referringEmployee: true },
-        },
+      const project = await this.projectRepository.findOne({
+        where: { id: projectId, projectUser: { userId } },
+        relations: { referringEmployee: true },
       });
 
-      if (!projectUser) {
-        return Err('Could not find project');
+      if (!project) {
+        return Err(new ProjectNotFoundException());
       }
-
-      const project = projectUser.project;
 
       return Ok(project);
     } catch (error) {
-      return Err('Could not find projects');
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
     }
   }
 
