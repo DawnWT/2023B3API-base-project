@@ -32,3 +32,11 @@ export class UserNotAvailableException extends BaseOptionException<'UserNotAvail
 
   type = 'UserNotAvailableException' as const;
 }
+
+export class UserNotAllowedException extends BaseOptionException<'UserNotAllowedException'> {
+  constructor() {
+    super(null);
+  }
+
+  type = 'UserNotAllowedException' as const;
+}
