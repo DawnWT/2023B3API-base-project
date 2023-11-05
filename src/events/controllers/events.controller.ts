@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -13,6 +14,7 @@ import { IsAuth } from '../../users/guards/is-auth.guard';
 import { CreateEventDto } from '../dto/create-event.dto';
 import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
+import { GetEventDto } from '../dto/get-event.dto';
 
 @Controller('events')
 export class EventsController {
@@ -63,5 +65,23 @@ export class EventsController {
     }
 
     return res.status(HttpStatus.OK).send(events.content);
+  }
+
+  @UseGuards(IsAuth)
+  @Get('/:id')
+  async findOne(@Param() { id }: GetEventDto, @Res() res: Response) {
+    const event = await this.eventsService.findOne(id);
+
+    if (event.isErr()) {
+      if (event.error.type === 'EventNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send('Event not found');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
+    }
+
+    return res.status(HttpStatus.OK).send(event.content);
   }
 }
