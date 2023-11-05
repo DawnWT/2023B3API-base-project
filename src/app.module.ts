@@ -6,6 +6,7 @@ import { User } from './users/entities/user.entity';
 import { ProjectsModule } from './projects/projects.module';
 import { Project } from './projects/entities/project.entity';
 import { ProjectUser } from './projects/entities/project-user.entity';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ProjectUser } from './projects/entities/project-user.entity';
     }),
     UsersModule,
     ProjectsModule,
+    EventsModule,
   ],
   controllers: [],
   providers: [],
