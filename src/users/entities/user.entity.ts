@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { ProjectUser } from '../../projects/entities/project-user.entity';
+import { Event } from '../../events/entities/event.entity';
 
 @Entity()
 export class User {
@@ -34,4 +35,7 @@ export class User {
 
   @OneToMany(() => ProjectUser, (projectUser) => projectUser.user)
   public projectUser: ProjectUser[];
+
+  @OneToMany(() => Event, (event) => event.user)
+  public events: Event[];
 }
