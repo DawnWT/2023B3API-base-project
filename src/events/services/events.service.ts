@@ -9,12 +9,14 @@ import { Err, Ok, Option } from '../../types/option';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, TypeORMError } from 'typeorm';
 import { EventNotFoundException } from '../types/error';
+import { UsersService } from '../../users/services/users.service';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
+    private readonly userService: UsersService,
   ) {}
 
   async findOne(
