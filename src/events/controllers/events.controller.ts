@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Req,
@@ -48,5 +49,19 @@ export class EventsController {
     }
 
     return res.status(HttpStatus.CREATED).send(event.content);
+  }
+
+  @UseGuards(IsAuth)
+  @Get()
+  async findAll(@Res() res: Response) {
+    const events = await this.eventsService.findAll();
+
+    if (events.isErr()) {
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
+    }
+
+    return res.status(HttpStatus.OK).send(events.content);
   }
 }
