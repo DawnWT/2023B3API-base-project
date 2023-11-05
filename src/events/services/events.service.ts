@@ -8,6 +8,7 @@ import {
 import { Err, Ok, Option } from '../../types/option';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, TypeORMError } from 'typeorm';
+import { EventNotFoundException } from '../types/error';
 
 @Injectable()
 export class EventsService {
@@ -15,6 +16,28 @@ export class EventsService {
     @InjectRepository(Event)
     private readonly eventRepository: Repository<Event>,
   ) {}
+
+  async findOne(
+    id: string,
+  ): Promise<Option<Event, EventNotFoundException | BaseError>> {
+    try {
+      const event = await this.eventRepository.findOne({ where: { id } });
+
+      if (!event) {
+        return Err(new EventNotFoundException());
+      }
+
+      return Ok(event);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
 
   async findAll(): Promise<Option<Array<Event>, BaseError>> {
     try {
