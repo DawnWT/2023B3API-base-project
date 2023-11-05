@@ -14,6 +14,7 @@ import {
   DatabaseInternalError,
   UnknownError,
 } from '../../types/error';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class UsersService {
@@ -182,6 +183,51 @@ export class UsersService {
         ) {
           return Ok(false);
         }
+      }
+
+      return Ok(true);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
+
+  async userIsAvailableForEvent(
+    id: string,
+    date: Date,
+  ): Promise<Option<boolean, UserNotFoundException | BaseError>> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: { events: true },
+        select: { events: { date: true, eventType: true } },
+      });
+
+      if (!user) {
+        return Err(new UserNotFoundException());
+      }
+
+      const parsedDate = dayjs(date);
+
+      let lastWeek = 0;
+
+      for (const event of user.events) {
+        const parsedEventDate = dayjs(event.date);
+
+        if (parsedDate.isSame(parsedEventDate, 'day')) {
+          return Ok(false);
+        }
+
+        // if (event.eventType === 'PaidLeave') {
+        if (parsedDate.isSame(parsedEventDate, 'week')) lastWeek++;
+
+        if (lastWeek === 3) return Ok(false);
+        // }
       }
 
       return Ok(true);
