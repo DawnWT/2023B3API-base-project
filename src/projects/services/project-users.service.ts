@@ -43,7 +43,7 @@ export class ProjectUsersService {
   > {
     const { projectId, userId, startDate, endDate } = createProjectUserDto;
 
-    const userIsAvailable = await this.userService.userIsAvailable(
+    const userIsAvailable = await this.userService.userIsAvailableForProject(
       userId,
       startDate,
       endDate,

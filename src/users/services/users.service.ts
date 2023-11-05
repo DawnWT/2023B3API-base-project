@@ -157,7 +157,7 @@ export class UsersService {
     }
   }
 
-  async userIsAvailable(
+  async userIsAvailableForProject(
     id: string,
     startDate: Date,
     endDate: Date,
