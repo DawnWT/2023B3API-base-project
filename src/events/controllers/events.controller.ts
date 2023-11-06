@@ -16,8 +16,8 @@ import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
 import { GetEventDto } from '../dto/get-event.dto';
 import { Roles } from '../../users/decorators/roles.decorator';
-import { GetValidateDto } from '../dto/get-validate.dto';
-import { GetDeclineDto } from '../dto/get-decline.dto';
+import { ValidateDto } from '../dto/validate.dto';
+import { DeclineDto } from '../dto/decline.dto';
 
 @Controller('events')
 export class EventsController {
@@ -92,7 +92,7 @@ export class EventsController {
   @UseGuards(IsAuth)
   @Post('/:id/validate')
   async validate(
-    @Param() { id: eventId }: GetValidateDto,
+    @Param() { id: eventId }: ValidateDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -124,7 +124,7 @@ export class EventsController {
   @UseGuards(IsAuth)
   @Post('/:id/decline')
   async decline(
-    @Param() { id: eventId }: GetDeclineDto,
+    @Param() { id: eventId }: DeclineDto,
     @Req() req: Request,
     @Res() res: Response,
   ) {

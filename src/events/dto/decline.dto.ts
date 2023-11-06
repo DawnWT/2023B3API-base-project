@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsUUID } from 'class-validator';
 
-export class GetValidateDto {
+export class DeclineDto {
   @IsUUID(4)
   @IsNotEmpty()
   id: string;
