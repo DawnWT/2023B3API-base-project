@@ -82,7 +82,7 @@ export class ProjectsService {
   async findAllFor(id: string): Promise<Option<Array<Project>, BaseError>> {
     try {
       const projects = await this.projectRepository.find({
-        where: { projectUser: { userId: id } },
+        where: { projectsUser: { userId: id } },
         relations: { referringEmployee: true },
       });
 
@@ -129,7 +129,7 @@ export class ProjectsService {
   ): Promise<Option<Project, ProjectNotFoundException | BaseError>> {
     try {
       const project = await this.projectRepository.findOne({
-        where: { id: projectId, projectUser: { userId } },
+        where: { id: projectId, projectsUser: { userId } },
         relations: { referringEmployee: true },
       });
 

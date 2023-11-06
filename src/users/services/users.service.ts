@@ -166,17 +166,17 @@ export class UsersService {
     try {
       const user = await this.userRepository.findOne({
         where: { id },
-        relations: { projectUser: true },
-        select: { projectUser: { startDate: true, endDate: true } },
+        relations: { projectsUser: true },
+        select: { projectsUser: { startDate: true, endDate: true } },
       });
 
       if (!user) {
         return Err(new UserNotFoundException());
       }
 
-      const { projectUser } = user;
+      const { projectsUser } = user;
 
-      for (const pj of projectUser) {
+      for (const pj of projectsUser) {
         if (
           (startDate >= pj.startDate && startDate <= pj.endDate) ||
           (endDate >= pj.startDate && endDate <= pj.endDate)

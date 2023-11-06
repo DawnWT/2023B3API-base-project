@@ -34,7 +34,7 @@ export class User {
   public role?: 'Employee' | 'Admin' | 'ProjectManager'; // valeur par defaut : 'Employee'
 
   @OneToMany(() => ProjectUser, (projectUser) => projectUser.user)
-  public projectUser: ProjectUser[];
+  public projectsUser: ProjectUser[];
 
   @OneToMany(() => Event, (event) => event.user)
   public events: Event[];

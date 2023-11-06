@@ -30,11 +30,11 @@ export class ProjectUser {
   @Column({ type: 'uuid' })
   public userId!: string; //au format uuidv4
 
-  @ManyToOne(() => Project, (project) => project.projectUser)
+  @ManyToOne(() => Project, (project) => project.projectsUser)
   @JoinColumn({ name: 'projectId' })
   public project: Project;
 
-  @ManyToOne(() => User, (user) => user.projectUser)
+  @ManyToOne(() => User, (user) => user.projectsUser)
   @JoinColumn({ name: 'userId' })
   public user: User;
 }

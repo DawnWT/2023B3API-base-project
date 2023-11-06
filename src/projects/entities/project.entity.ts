@@ -30,5 +30,5 @@ export class Project {
   public referringEmployee: User;
 
   @OneToMany(() => ProjectUser, (projectUser) => projectUser.project)
-  public projectUser: ProjectUser[];
+  public projectsUser: ProjectUser[];
 }
