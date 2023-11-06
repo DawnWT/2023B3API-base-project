@@ -222,20 +222,22 @@ export class UsersService {
 
       const parsedDate = dayjs(date);
 
-      let lastWeek = 0;
+      const eventSameDay = user.events.some((e) =>
+        parsedDate.isSame(dayjs(e.date), 'day'),
+      );
 
-      for (const event of user.events) {
-        const parsedEventDate = dayjs(event.date);
+      if (eventSameDay) {
+        return Ok(false);
+      }
 
-        if (parsedDate.isSame(parsedEventDate, 'day')) {
-          return Ok(false);
-        }
+      const eventSameWeek = user.events.filter(
+        (e) =>
+          e.eventType === 'PaidLeave' &&
+          parsedDate.isSame(dayjs(e.date), 'week'),
+      );
 
-        if (event.eventType === 'PaidLeave') {
-          if (parsedDate.isSame(parsedEventDate, 'week')) lastWeek++;
-
-          if (lastWeek === 3) return Ok(false);
-        }
+      if (eventSameWeek.length > 1) {
+        return Ok(false);
       }
 
       return Ok(true);
