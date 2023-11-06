@@ -8,3 +8,11 @@ export class EventNotFoundException extends BaseOptionException<'EventNotFoundEx
 
   type = 'EventNotFoundException' as const;
 }
+
+export class CantUpdateEventException extends BaseOptionException<'CantUpdateEventException'> {
+  constructor(error?: QueryFailedError) {
+    super(error);
+  }
+
+  type = 'CantUpdateEventException' as const;
+}
