@@ -176,10 +176,18 @@ export class UsersService {
 
       const { projectsUser } = user;
 
+      const parsedStartDate = dayjs(startDate);
+      const parsedEndDate = dayjs(endDate);
+
       for (const pj of projectsUser) {
+        const pjParsedStartDate = dayjs(pj.startDate);
+        const pjParsedEndDate = dayjs(pj.endDate);
+
         if (
-          (startDate >= pj.startDate && startDate <= pj.endDate) ||
-          (endDate >= pj.startDate && endDate <= pj.endDate)
+          (parsedStartDate.isAfter(pjParsedStartDate) &&
+            parsedStartDate.isBefore(pjParsedEndDate)) ||
+          (parsedEndDate.isAfter(pjParsedStartDate) &&
+            parsedEndDate.isBefore(pjParsedEndDate))
         ) {
           return Ok(false);
         }
