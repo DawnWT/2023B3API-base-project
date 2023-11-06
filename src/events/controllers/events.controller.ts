@@ -109,15 +109,14 @@ export class EventsController {
         return res.status(HttpStatus.UNAUTHORIZED).send("Can't update event");
       }
 
-      return (
-        res
-          .status(HttpStatus.INTERNAL_SERVER_ERROR)
-          // .send('Internal server error');
-          .send(event.error.message)
-      );
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
-    return res.status(HttpStatus.OK).send({ affectedLines: event.content });
+    return res
+      .status(HttpStatus.CREATED)
+      .send({ affectedLines: event.content });
   }
 
   @Roles('Admin', 'ProjectManager')
@@ -146,6 +145,8 @@ export class EventsController {
         .send('Internal server error');
     }
 
-    return res.status(HttpStatus.OK).send({ affectedLines: event.content });
+    return res
+      .status(HttpStatus.CREATED)
+      .send({ affectedLines: event.content });
   }
 }
