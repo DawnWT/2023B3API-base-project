@@ -111,11 +111,9 @@ export class EventsService {
   ): Promise<
     Option<Event, UserNotFoundException | UserNotAvailableException | BaseError>
   > {
-    const parsedDate = new Date(createEventDto.date);
-
     const userIsAvailable = await this.userService.userIsAvailableForEvent(
       createEventDto.userId,
-      parsedDate,
+      createEventDto.date,
     );
 
     if (userIsAvailable.isErr()) {
@@ -132,7 +130,7 @@ export class EventsService {
       return user;
     }
 
-    const event = new Event({ ...createEventDto, date: parsedDate });
+    const event = new Event(createEventDto);
 
     try {
       const savedEvent = await this.eventRepository.save(event);

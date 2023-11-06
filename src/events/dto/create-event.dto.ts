@@ -1,9 +1,11 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateEventDto {
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
-  date: string;
+  @Type(() => Date)
+  date: Date;
 
   @IsString()
   eventDescription?: string;
