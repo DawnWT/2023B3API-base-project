@@ -241,4 +241,53 @@ export class UsersService {
       }
     }
   }
+
+  async getMealVouchers(
+    id: string,
+    month: number,
+  ): Promise<Option<number, UserNotFoundException | BaseError>> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: { events: true },
+      });
+
+      if (!user) {
+        return Err(new UserNotFoundException());
+      }
+
+      const parsedEvents = user.events.filter(
+        (e) =>
+          e.eventStatus === 'Accepted' &&
+          dayjs(new Date(e.date)).month() - 1 === month,
+      );
+
+      const mealVoucherValue = 8;
+      let mealVouchersCount = parsedEvents.length * -1;
+
+      const djsMonth = dayjs().month(month - 1);
+
+      const daysInMonth = djsMonth.daysInMonth();
+      const firstDay = djsMonth.day();
+
+      const days = new Array<number>(daysInMonth)
+        .fill(0)
+        .map((_, i) => (firstDay + i) % 7);
+
+      mealVouchersCount += days.reduce(
+        (acc, day) => (day !== 0 ? (day !== 6 ? acc + 1 : acc) : acc),
+        0,
+      );
+
+      return Ok(mealVouchersCount * mealVoucherValue);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
 }
