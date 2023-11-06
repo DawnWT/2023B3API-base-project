@@ -8,7 +8,10 @@ import {
 import { Err, Ok, Option } from '../../types/option';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, TypeORMError } from 'typeorm';
-import { EventNotFoundException } from '../types/error';
+import {
+  CantUpdateEventException,
+  EventNotFoundException,
+} from '../types/error';
 import { CreateEventDto } from '../dto/create-event.dto';
 import {
   UserNotAvailableException,
@@ -173,6 +176,90 @@ export class EventsService {
       const events = await this.eventRepository.find();
 
       return Ok(events);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
+
+  async validate(
+    eventId: string,
+    managerId: string,
+    managerRole: UserRoles,
+  ): Promise<
+    Option<
+      number,
+      EventNotFoundException | CantUpdateEventException | BaseError
+    >
+  > {
+    const canHandle = await this.canHandleEvent(
+      eventId,
+      managerId,
+      managerRole,
+    );
+
+    if (canHandle.isErr()) {
+      return canHandle;
+    }
+
+    if (!canHandle.content) {
+      return Err(new CantUpdateEventException());
+    }
+
+    try {
+      const updatedResult = await this.eventRepository.update(
+        { id: eventId },
+        { eventStatus: 'Accepted' },
+      );
+
+      return Ok(updatedResult.affected);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
+
+  async decline(
+    eventId: string,
+    managerId: string,
+    managerRole: UserRoles,
+  ): Promise<
+    Option<
+      number,
+      EventNotFoundException | CantUpdateEventException | BaseError
+    >
+  > {
+    const canHandle = await this.canHandleEvent(
+      eventId,
+      managerId,
+      managerRole,
+    );
+
+    if (canHandle.isErr()) {
+      return canHandle;
+    }
+
+    if (!canHandle.content) {
+      return Err(new CantUpdateEventException());
+    }
+
+    try {
+      const updatedResult = await this.eventRepository.update(
+        { id: eventId },
+        { eventStatus: 'Declined' },
+      );
+
+      return Ok(updatedResult.affected);
     } catch (error) {
       if (error instanceof TypeORMError) {
         return Err(new DatabaseInternalError(error));
