@@ -29,9 +29,12 @@ export class ProjectUsersService {
     private readonly userService: UsersService,
   ) {}
 
-  async create(
-    createProjectUserDto: CreateProjectUserDto,
-  ): Promise<
+  async create({
+    projectId,
+    userId,
+    startDate,
+    endDate,
+  }: CreateProjectUserDto): Promise<
     Option<
       ProjectUser,
       | ProjectNotFoundException
@@ -40,8 +43,6 @@ export class ProjectUsersService {
       | BaseError
     >
   > {
-    const { projectId, userId, startDate, endDate } = createProjectUserDto;
-
     const userIsAvailable = await this.userService.userIsAvailableForProject(
       userId,
       startDate,
