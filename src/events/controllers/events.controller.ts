@@ -17,6 +17,7 @@ import { Payload } from '../../types/payload';
 import { GetEventDto } from '../dto/get-event.dto';
 import { Roles } from '../../users/decorators/roles.decorator';
 import { GetValidateDto } from '../../projects/dto/get-validate.dto';
+import { GetDeclineDto } from '../../projects/dto/get-decline.dto';
 
 @Controller('events')
 export class EventsController {
@@ -114,6 +115,35 @@ export class EventsController {
           // .send('Internal server error');
           .send(event.error.message)
       );
+    }
+
+    return res.status(HttpStatus.OK).send({ affectedLines: event.content });
+  }
+
+  @Roles('Admin', 'ProjectManager')
+  @UseGuards(IsAuth)
+  @Post('/:id/decline')
+  async decline(
+    @Param() { id: eventId }: GetDeclineDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const { id: managerId, role } = req['token'] as Payload;
+
+    const event = await this.eventsService.decline(eventId, managerId, role);
+
+    if (event.isErr()) {
+      if (event.error.type === 'EventNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send('Event not found');
+      }
+
+      if (event.error.type === 'CantUpdateEventException') {
+        return res.status(HttpStatus.UNAUTHORIZED).send("Can't update event");
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
     }
 
     return res.status(HttpStatus.OK).send({ affectedLines: event.content });
