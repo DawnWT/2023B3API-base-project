@@ -1,13 +1,16 @@
-import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsDate, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class CreateProjectUserDto {
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
-  startDate!: string;
+  @Type(() => Date)
+  startDate!: Date;
 
-  @IsDateString()
+  @IsDate()
   @IsNotEmpty()
-  endDate!: string;
+  @Type(() => Date)
+  endDate!: Date;
 
   @IsUUID(4)
   @IsNotEmpty()
