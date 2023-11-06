@@ -19,6 +19,7 @@ import {
   UserNotAvailableException,
   UserNotFoundException,
 } from '../../users/types/error';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ProjectUsersService {
@@ -28,6 +29,46 @@ export class ProjectUsersService {
     private readonly projectService: ProjectsService,
     private readonly userService: UsersService,
   ) {}
+
+  private async userIsAvailable(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Option<boolean, BaseError>> {
+    try {
+      const projectsUser = await this.projectUserRepository.find({
+        where: { userId },
+        select: { startDate: true, endDate: true },
+      });
+
+      const parsedStartDate = dayjs(startDate);
+      const parsedEndDate = dayjs(endDate);
+
+      for (const pj of projectsUser) {
+        const pjParsedStartDate = dayjs(pj.startDate);
+        const pjParsedEndDate = dayjs(pj.endDate);
+
+        if (
+          (parsedStartDate.isAfter(pjParsedStartDate) &&
+            parsedStartDate.isBefore(pjParsedEndDate)) ||
+          (parsedEndDate.isAfter(pjParsedStartDate) &&
+            parsedEndDate.isBefore(pjParsedEndDate))
+        ) {
+          return Ok(false);
+        }
+      }
+
+      return Ok(true);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
 
   async create({
     projectId,
@@ -43,7 +84,7 @@ export class ProjectUsersService {
       | BaseError
     >
   > {
-    const userIsAvailable = await this.userService.userIsAvailableForProject(
+    const userIsAvailable = await this.userIsAvailable(
       userId,
       startDate,
       endDate,

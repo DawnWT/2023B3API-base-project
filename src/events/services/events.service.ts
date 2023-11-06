@@ -106,12 +106,54 @@ export class EventsService {
     }
   }
 
+  private async userIsAvailable(
+    userId: string,
+    date: Date,
+  ): Promise<Option<boolean, BaseError>> {
+    try {
+      const events = await this.eventRepository.find({
+        where: { userId },
+        select: { date: true, eventType: true },
+      });
+
+      const parsedDate = dayjs(date);
+
+      const eventSameDay = events.some((e) =>
+        parsedDate.isSame(dayjs(e.date), 'day'),
+      );
+
+      if (eventSameDay) {
+        return Ok(false);
+      }
+
+      const eventSameWeek = events.filter(
+        (e) =>
+          e.eventType === 'PaidLeave' &&
+          parsedDate.isSame(dayjs(e.date), 'week'),
+      );
+
+      if (eventSameWeek.length > 1) {
+        return Ok(false);
+      }
+
+      return Ok(true);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
+
   async create(
     createEventDto: CreateEventDto & { userId: string },
   ): Promise<
-    Option<Event, UserNotFoundException | UserNotAvailableException | BaseError>
+    Option<Event, UserNotAvailableException | UserNotFoundException | BaseError>
   > {
-    const userIsAvailable = await this.userService.userIsAvailableForEvent(
+    const userIsAvailable = await this.userIsAvailable(
       createEventDto.userId,
       createEventDto.date,
     );
