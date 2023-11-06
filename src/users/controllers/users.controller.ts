@@ -17,6 +17,7 @@ import { LoginDto } from '../dto/login.dto';
 import { GetUserDto } from '../dto/get-user.dto';
 import { AuthService } from '../services/auth.service';
 import { Payload } from '../../types/payload';
+import { GetMealVouchersDto } from '../dto/get-meal-vouchers.dto';
 
 @Controller('users')
 export class UsersController {
@@ -120,5 +121,28 @@ export class UsersController {
     }
 
     return res.status(HttpStatus.OK).json(user.content);
+  }
+
+  @UseGuards(IsAuth)
+  @Get(':id/meal-vouchers/:month')
+  async getMealVouchers(
+    @Param() { id, month }: GetMealVouchersDto,
+    @Res() res: Response,
+  ) {
+    const mealVouchers = await this.userService.getMealVouchers(id, month);
+
+    if (mealVouchers.isErr()) {
+      const { error } = mealVouchers;
+
+      if (error.type === 'UserNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send('User not found');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
+    }
+
+    return res.status(HttpStatus.OK).send(mealVouchers.content.toString());
   }
 }
