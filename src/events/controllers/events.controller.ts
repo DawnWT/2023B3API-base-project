@@ -16,8 +16,8 @@ import { Request, Response } from 'express';
 import { Payload } from '../../types/payload';
 import { GetEventDto } from '../dto/get-event.dto';
 import { Roles } from '../../users/decorators/roles.decorator';
-import { GetValidateDto } from '../../projects/dto/get-validate.dto';
-import { GetDeclineDto } from '../../projects/dto/get-decline.dto';
+import { GetValidateDto } from '../dto/get-validate.dto';
+import { GetDeclineDto } from '../dto/get-decline.dto';
 
 @Controller('events')
 export class EventsController {
