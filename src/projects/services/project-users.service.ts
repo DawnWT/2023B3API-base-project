@@ -43,10 +43,13 @@ export class ProjectUsersService {
   > {
     const { projectId, userId, startDate, endDate } = createProjectUserDto;
 
+    const parsedStartDate = new Date(startDate);
+    const parsedEndDate = new Date(endDate);
+
     const userIsAvailable = await this.userService.userIsAvailableForProject(
       userId,
-      startDate,
-      endDate,
+      parsedStartDate,
+      parsedEndDate,
     );
 
     if (userIsAvailable.isErr()) {
@@ -68,8 +71,8 @@ export class ProjectUsersService {
     }
 
     const projectUser = new ProjectUser({
-      startDate,
-      endDate,
+      startDate: parsedStartDate,
+      endDate: parsedEndDate,
       project: project.content,
       user: user.content,
     });

@@ -3,11 +3,11 @@ import { IsDateString, IsNotEmpty, IsUUID } from 'class-validator';
 export class CreateProjectUserDto {
   @IsDateString()
   @IsNotEmpty()
-  startDate!: Date;
+  startDate!: string;
 
   @IsDateString()
   @IsNotEmpty()
-  endDate!: Date;
+  endDate!: string;
 
   @IsUUID(4)
   @IsNotEmpty()
