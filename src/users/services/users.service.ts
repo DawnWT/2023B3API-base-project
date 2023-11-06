@@ -231,11 +231,11 @@ export class UsersService {
           return Ok(false);
         }
 
-        // if (event.eventType === 'PaidLeave') {
-        if (parsedDate.isSame(parsedEventDate, 'week')) lastWeek++;
+        if (event.eventType === 'PaidLeave') {
+          if (parsedDate.isSame(parsedEventDate, 'week')) lastWeek++;
 
-        if (lastWeek === 3) return Ok(false);
-        // }
+          if (lastWeek === 3) return Ok(false);
+        }
       }
 
       return Ok(true);
