@@ -15,6 +15,8 @@ import {
   UserNotFoundException,
 } from '../../users/types/error';
 import { UsersService } from '../../users/services/users.service';
+import { UserRoles } from '../../users/types/utility';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class EventsService {
@@ -23,6 +25,83 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     private readonly userService: UsersService,
   ) {}
+
+  private async canHandleEvent(
+    eventId: string,
+    managerId: string,
+    managerRole: UserRoles,
+  ): Promise<Option<boolean, EventNotFoundException | BaseError>> {
+    if (managerRole === 'Employee') {
+      return Ok(false);
+    }
+
+    try {
+      const event = await this.eventRepository.findOne({
+        where: { id: eventId },
+        relations: { user: { projectsUser: { project: true } } },
+      });
+
+      if (!event) {
+        return Err(new EventNotFoundException());
+      }
+
+      if (event.eventStatus !== 'Pending') {
+        return Ok(false);
+      }
+
+      const parsedEventDate = dayjs(new Date(event.date));
+
+      if (managerRole === 'ProjectManager') {
+        const projectFromManager = event.user.projectsUser
+          .map((pu) =>
+            pu.project.referringEmployeeId === managerId ? pu : null,
+          )
+          .filter((pu) => {
+            if (pu === null) return false;
+
+            const parsedStartDate = dayjs(new Date(pu.startDate));
+            const parsedEndDate = dayjs(new Date(pu.endDate));
+
+            return (
+              (parsedStartDate.isBefore(parsedEventDate) ||
+                parsedStartDate.isSame(parsedEventDate)) &&
+              (parsedEndDate.isAfter(parsedEventDate) ||
+                parsedEndDate.isSame(parsedEventDate))
+            );
+          });
+
+        if (projectFromManager.length > 0) {
+          return Ok(true);
+        }
+      } else {
+        const haveProjects = event.user.projectsUser.some((pu) => {
+          const parsedStartDate = dayjs(new Date(pu.startDate));
+          const parsedEndDate = dayjs(new Date(pu.endDate));
+
+          return (
+            (parsedStartDate.isBefore(parsedEventDate) ||
+              parsedStartDate.isSame(parsedEventDate)) &&
+            (parsedEndDate.isAfter(parsedEventDate) ||
+              parsedEndDate.isSame(parsedEventDate))
+          );
+        });
+
+        if (haveProjects) {
+          return Ok(true);
+        }
+      }
+
+      return Ok(false);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
 
   async create(
     createEventDto: CreateEventDto & { userId: string },
