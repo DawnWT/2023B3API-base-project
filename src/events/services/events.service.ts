@@ -21,6 +21,8 @@ import { UsersService } from '../../users/services/users.service';
 import { UserRoles } from '../../users/types/utility';
 import * as dayjs from 'dayjs';
 import { ProjectNotFoundException } from '../../projects/types/error';
+import { Cron } from '@nestjs/schedule';
+import { writeFile } from 'fs/promises';
 
 @Injectable()
 export class EventsService {
@@ -377,5 +379,27 @@ export class EventsService {
         return Err(new UnknownError(error));
       }
     }
+  }
+
+  @Cron('0 0 0 25 * *')
+  async handleCron() {
+    const date = new Date(Date.now());
+    const csv = await this.createCsv();
+
+    if (csv.isErr()) {
+      const { error } = csv;
+
+      await writeFile(
+        `Congés - ${date.getMonth() + 1}/${date.getFullYear()}.csv`,
+        error.message,
+      );
+
+      return;
+    }
+
+    await writeFile(
+      `Congés - ${date.getMonth() + 1}/${date.getFullYear()}.csv`,
+      csv.content,
+    );
   }
 }
