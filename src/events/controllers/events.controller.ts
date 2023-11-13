@@ -149,4 +149,26 @@ export class EventsController {
       .status(HttpStatus.CREATED)
       .send({ affectedLines: event.content });
   }
+
+  @Roles('Admin', 'ProjectManager')
+  @UseGuards(IsAuth)
+  @Get('/csv')
+  async getCsv(@Res() res: Response) {
+    const csv = await this.eventsService.createCsv();
+
+    if (csv.isErr()) {
+      const { error } = csv;
+      console.log(error);
+
+      if (error.type === 'ProjectNotFoundException') {
+        return res.status(HttpStatus.NOT_FOUND).send('Project not found');
+      }
+
+      return res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Internal server error');
+    }
+
+    return res.status(HttpStatus.OK).send(csv.content);
+  }
 }
