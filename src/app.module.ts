@@ -8,6 +8,7 @@ import { Project } from './projects/entities/project.entity';
 import { ProjectUser } from './projects/entities/project-user.entity';
 import { EventsModule } from './events/events.module';
 import { Event } from './events/entities/event.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Event } from './events/entities/event.entity';
       }),
       inject: [ConfigService],
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     ProjectsModule,
     EventsModule,
