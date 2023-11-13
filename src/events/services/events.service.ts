@@ -20,6 +20,7 @@ import {
 import { UsersService } from '../../users/services/users.service';
 import { UserRoles } from '../../users/types/utility';
 import * as dayjs from 'dayjs';
+import { ProjectNotFoundException } from '../../projects/types/error';
 
 @Injectable()
 export class EventsService {
@@ -304,6 +305,69 @@ export class EventsService {
       );
 
       return Ok(updatedResult.affected);
+    } catch (error) {
+      if (error instanceof TypeORMError) {
+        return Err(new DatabaseInternalError(error));
+      }
+
+      if (error instanceof Error) {
+        return Err(new UnknownError(error));
+      }
+    }
+  }
+
+  async createCsv(): Promise<
+    Option<string, BaseError | ProjectNotFoundException>
+  > {
+    try {
+      const month = new Date().getMonth() + 1;
+      const events = await this.eventRepository
+        .createQueryBuilder('event')
+        .where(`EXTRACT(MONTH FROM event.date) = :month`, { month })
+        .andWhere('event.eventStatus = :eventStatus', {
+          eventStatus: 'Accepted',
+        })
+        .andWhere('event.eventType = :eventType', { eventType: 'PaidLeave' })
+        .leftJoinAndSelect('event.user', 'user')
+        .leftJoinAndSelect('user.projectsUser', 'projectsUser')
+        .leftJoinAndSelect('projectsUser.project', 'project')
+        .getMany();
+
+      console.log(events);
+
+      let content = 'Date,User id,User name,Event Id,Project Id,Project name\n';
+
+      for (const event of events) {
+        console.log(event.user);
+        console.log(event.user.projectsUser);
+
+        const parsedEventDate = dayjs(new Date(event.date));
+        const projectUser = event.user.projectsUser.find((pu) => {
+          const parsedStartDate = dayjs(new Date(pu.startDate));
+          const parsedEndDate = dayjs(new Date(pu.endDate));
+
+          return (
+            (parsedStartDate.isBefore(parsedEventDate) ||
+              parsedStartDate.isSame(parsedEventDate)) &&
+            (parsedEndDate.isAfter(parsedEventDate) ||
+              parsedEndDate.isSame(parsedEventDate))
+          );
+        });
+
+        console.log(projectUser);
+
+        if (!projectUser) {
+          return Err(new ProjectNotFoundException());
+        }
+
+        const project = projectUser.project;
+
+        const line = `${event.date},${event.user.id},${event.user.username},${event.id},${project.id},${project.name}\n`;
+
+        content += line;
+      }
+
+      return Ok(content);
     } catch (error) {
       if (error instanceof TypeORMError) {
         return Err(new DatabaseInternalError(error));
