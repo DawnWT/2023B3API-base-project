@@ -128,11 +128,11 @@ export class EventsService {
 
       const eventSameWeek = events.filter(
         (e) =>
-          e.eventType === 'PaidLeave' &&
+          e.eventType === 'RemoteWork' &&
           parsedDate.isSame(dayjs(e.date), 'week'),
       );
 
-      if (eventSameWeek.length > 1) {
+      if (eventSameWeek.length > 2) {
         return Ok(false);
       }
 
@@ -173,6 +173,10 @@ export class EventsService {
     }
 
     const event = new Event(createEventDto);
+
+    if (createEventDto.eventType === 'RemoteWork') {
+      event.eventStatus = 'Accepted';
+    }
 
     try {
       const savedEvent = await this.eventRepository.save(event);
