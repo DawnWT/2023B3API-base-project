@@ -135,7 +135,7 @@ export class EventsService {
           parsedDate.isSame(dayjs(e.date), 'week'),
       );
 
-      if (eventSameWeek.length > 2) {
+      if (eventSameWeek.length > 1) {
         return Ok(false);
       }
 
