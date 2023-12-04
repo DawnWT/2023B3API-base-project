@@ -181,7 +181,9 @@ export class UsersService {
       const mealVoucherValue = 8;
       let mealVouchersCount = parsedEvents.length * -1;
 
-      const djsMonth = dayjs().month(month - 1);
+      const djsMonth = dayjs()
+        .month(month - 1)
+        .date(1);
 
       const daysInMonth = djsMonth.daysInMonth();
       const firstDay = djsMonth.day();
