@@ -182,9 +182,7 @@ export class ProjectUsersService {
 
   async findAll(): Promise<Option<Array<ProjectUser>, BaseError>> {
     try {
-      const projectUsers = await this.projectUserRepository.find({
-        relations: { project: true },
-      });
+      const projectUsers = await this.projectUserRepository.find();
 
       return Ok(projectUsers);
     } catch (error) {
@@ -204,7 +202,6 @@ export class ProjectUsersService {
     try {
       const projectUsers = await this.projectUserRepository.find({
         where: { userId },
-        relations: { project: true },
       });
 
       return Ok(projectUsers);

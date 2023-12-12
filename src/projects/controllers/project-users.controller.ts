@@ -73,9 +73,7 @@ export class ProjectUsersController {
         return res.status(HttpStatus.NOT_FOUND).send('');
       }
 
-      return res
-        .status(HttpStatus.OK)
-        .json(projectUser.content.map((pu) => pu.project));
+      return res.status(HttpStatus.OK).json(projectUser.content);
     }
 
     const projectUser = await this.projectUserService.findAll();
@@ -84,9 +82,7 @@ export class ProjectUsersController {
       return res.status(HttpStatus.NOT_FOUND).send('');
     }
 
-    return res
-      .status(HttpStatus.OK)
-      .json(projectUser.content.map((pu) => pu.project));
+    return res.status(HttpStatus.OK).json(projectUser.content);
   }
 
   @UseGuards(IsAuth)
