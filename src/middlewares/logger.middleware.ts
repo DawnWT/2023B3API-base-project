@@ -7,13 +7,25 @@ export const LoggerMiddleware = async function (
   next: NextFunction,
 ) {
   const ip = req.socket.remoteAddress;
-  const date = new Intl.DateTimeFormat('fr').format(Date.now());
-  const paramsString = Object.entries(req.params).reduce(
-    (acc, [key, value]) => {
-      return acc + `${key}=${value}`;
-    },
-    '',
+
+  const date = new Intl.DateTimeFormat('fr', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).format(Date.now());
+
+  const paramsList = Object.entries(req.query).map(
+    ([key, value]) => `${key}=${value}`,
   );
+
+  paramsList.push(
+    ...Object.entries(req.body).map(([key, value]) => `${key}=${value}`),
+  );
+
+  const paramsString = paramsList.join(',');
 
   const line = `${ip}|${req.path}|${paramsString}|${date}\n`;
   await appendFile('log.txt', line).catch(console.error);
