@@ -22,12 +22,6 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  private cleanUser(user: User): CleanUser {
-    delete user.password;
-
-    return user;
-  }
-
   async create(
     userDatas: CreateUserDto,
   ): Promise<Option<CleanUser, UserAlreadyExistException | BaseError>> {
@@ -36,9 +30,9 @@ export class UsersService {
     try {
       const savedUser = await this.userRepository.save(user);
 
-      const cleanUser = this.cleanUser(savedUser);
+      delete savedUser.password;
 
-      return Ok(cleanUser);
+      return Ok(savedUser);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         return Err(new UserAlreadyExistException(error));
@@ -86,23 +80,19 @@ export class UsersService {
     withPassword = false,
   ): Promise<Option<CleanUser | User, UserNotFoundException | BaseError>> {
     try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.id = :id', { id })
-        .addSelect('user.password')
-        .getOne();
+      const user = withPassword
+        ? await this.userRepository
+            .createQueryBuilder('user')
+            .where('user.id = :id', { id })
+            .addSelect('user.password')
+            .getOne()
+        : await this.userRepository.findOne({ where: { id } });
 
       if (!user) {
         return Err(new UserNotFoundException());
-      } else {
-        if (!withPassword) {
-          const cleanUser = this.cleanUser(user);
-
-          return Ok(cleanUser);
-        }
-
-        return Ok(user);
       }
+
+      return Ok(user);
     } catch (error) {
       if (error instanceof TypeORMError) {
         return Err(new DatabaseInternalError(error));
@@ -130,23 +120,19 @@ export class UsersService {
     withPassword = false,
   ): Promise<Option<CleanUser | User, UserNotFoundException | BaseError>> {
     try {
-      const user = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.email = :email', { email })
-        .addSelect('user.password')
-        .getOne();
+      const user = withPassword
+        ? await this.userRepository
+            .createQueryBuilder('user')
+            .where('user.email = :email', { email })
+            .addSelect('user.password')
+            .getOne()
+        : await this.userRepository.findOne({ where: { email } });
 
       if (!user) {
         return Err(new UserNotFoundException());
-      } else {
-        if (!withPassword) {
-          const cleanUser = this.cleanUser(user);
-
-          return Ok(cleanUser);
-        }
-
-        return Ok(user);
       }
+
+      return Ok(user);
     } catch (error) {
       if (error instanceof TypeORMError) {
         return Err(new DatabaseInternalError(error));
